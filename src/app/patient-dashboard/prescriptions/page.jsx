@@ -153,7 +153,7 @@ export default function PrescriptionsPage() {
   const fetchPrescriptions = async () => {
     try {
 
-      const res = await fetch(`https://practo-backend.vercel.app/api/appointment/fetch-checkin-by-id/${userID}`);
+      const res = await fetch(`http://localhost:3001/api/v1/appointment/fetch-checkin-by-id/${userID}`);
       const data = await res.json();
       console.log("prescription data", data);
       setData(data.data)

@@ -9,10 +9,14 @@ export const DoctorProvider = ({ children }) => {
 
   const fetchDoctorInfo = async (id) => {
     try {
-      const res = await fetch(`https://practo-backend.vercel.app/api/doctor/fetch-by-id/${id}`);
+      const res = await fetch(`http://localhost:3001/api/v1/doctor/fetch-by-id/${id}`);
       if (!res.ok) throw new Error('Failed to fetch doctor info');
-      const data = await res.json();
-      setDoctor(data);
+      const response = await res.json();
+      if (response.success && response.data) {
+        setDoctor(response.data.doctor);
+      } else {
+        throw new Error(response.message || 'Failed to fetch doctor info');
+      }
     } catch (err) {
       console.error(err);
     } finally {

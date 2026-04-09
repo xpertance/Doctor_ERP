@@ -40,7 +40,7 @@
 //   const fetchDoctors = async () => {
 //     try {
 //       setLoading(true);
-//       const response = await axios.get('https://practo-backend.vercel.app/api/doctor/fetchAll');
+//       const response = await axios.get('http://localhost:3001/api/doctor/fetchAll');
 //       setDoctors(response.data.doctors);
 //     } catch (err) {
 //       console.error("Error fetching doctors:", err);
@@ -60,7 +60,7 @@
 //   const handleDeleteDoctor = async (doctor) => {
 //     setIsDeleting(true);
 //     try {
-//       await axios.delete(`https://practo-backend.vercel.app/api/doctor/delete-by-id/${doctor._id}`);
+//       await axios.delete(`http://localhost:3001/api/doctor/delete-by-id/${doctor._id}`);
 //       setDoctors(prev => prev.filter(d => d._id !== doctor._id));
 //       setDeleteModal({ isOpen: false, doctor: null });
 //     } catch (error) {
@@ -77,7 +77,7 @@
 
 //     try {
 //       const response = await axios.put(
-//         `https://practo-backend.vercel.app/api/doctor/update-by-id/${doctorId}`,
+//         `http://localhost:3001/api/doctor/update-by-id/${doctorId}`,
 //         formattedData,
 //         {
 //           headers: {
@@ -916,8 +916,10 @@ export default function DoctorsPage() {
   const fetchDoctors = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://practo-backend.vercel.app/api/doctor/fetchAll');
-      setDoctors(response.data.doctors);
+      const response = await axios.get('http://localhost:3001/api/v1/doctor/fetchAll');
+      if (response.data.success) {
+        setDoctors(response.data.data.doctors);
+      }
     } catch (err) {
       console.error("Error fetching doctors:", err);
       setError(err.message || 'Failed to fetch doctors');
@@ -973,9 +975,11 @@ export default function DoctorsPage() {
   const handleDeleteDoctor = async (doctor) => {
     setIsDeleting(true);
     try {
-      await axios.delete(`https://practo-backend.vercel.app/api/doctor/delete-by-id/${doctor._id}`);
-      setDoctors(prev => prev.filter(d => d._id !== doctor._id));
-      setShowRejectModal(false);
+      const response = await axios.delete(`http://localhost:3001/api/v1/doctor/delete-by-id/${doctor._id}`);
+      if (response.data.success) {
+        setDoctors(prev => prev.filter(d => d._id !== doctor._id));
+        setShowRejectModal(false);
+      }
     } catch (error) {
       console.error('Error deleting doctor:', error);
       setError(error.message || 'Failed to delete doctor');
@@ -987,14 +991,16 @@ export default function DoctorsPage() {
   const handleApproveDoctor = async (id) => {
     try {
       setLoading(true);
-      const response = await axios.put(`https://practo-backend.vercel.app/api/doctor/update-by-id/${id}`, {
+      const response = await axios.put(`http://localhost:3001/api/v1/doctor/update-by-id/${id}`, {
         isVerified: true,
         status: 'active'
       });
-      setDoctors(prev => prev.map(doctor => 
-        doctor._id === id ? { ...doctor, isVerified: true, status: 'active' } : doctor
-      ));
-      setShowApprovalSuccess(true);
+      if (response.data.success) {
+        setDoctors(prev => prev.map(doctor => 
+          doctor._id === id ? { ...doctor, isVerified: true, status: 'active' } : doctor
+        ));
+        setShowApprovalSuccess(true);
+      }
     } catch (err) {
       console.error('Error:', err);
       setError(err.message || 'Failed to approve doctor');
@@ -1010,21 +1016,23 @@ export default function DoctorsPage() {
     }
     try {
       setLoading(true);
-      const response = await axios.put(`https://practo-backend.vercel.app/api/doctor/update-by-id/${selectedDoctor._id}`, {
+      const response = await axios.put(`http://localhost:3001/api/v1/doctor/update-by-id/${selectedDoctor._id}`, {
         status: 'rejected',
         isVerified: false,
         rejectionReason: rejectionReason.description
       });
-      setDoctors(prev => prev.map(doctor => 
-        doctor._id === selectedDoctor._id ? {
-          ...doctor,
-          status: 'rejected',
-          isVerified: false,
-          rejectionReason: rejectionReason.description
-        } : doctor
-      ));
-      setShowRejectModal(false);
-      setRejectionReason({ title: '', description: '' });
+      if (response.data.success) {
+        setDoctors(prev => prev.map(doctor => 
+          doctor._id === selectedDoctor._id ? {
+            ...doctor,
+            status: 'rejected',
+            isVerified: false,
+            rejectionReason: rejectionReason.description
+          } : doctor
+        ));
+        setShowRejectModal(false);
+        setRejectionReason({ title: '', description: '' });
+      }
     } catch (err) {
       console.error('Error:', err);
       setError(err.message || 'Failed to reject doctor');
@@ -1040,7 +1048,7 @@ export default function DoctorsPage() {
 
     try {
       const response = await axios.put(
-        `https://practo-backend.vercel.app/api/doctor/update-by-id/${doctorId}`,
+        `http://localhost:3001/api/v1/doctor/update-by-id/${doctorId}`,
         formattedData,
         {
           headers: {
@@ -1049,12 +1057,14 @@ export default function DoctorsPage() {
         }
       );
       
-      setDoctors(prev => prev.map(d => 
-        d._id === doctorId ? { ...d, ...formattedData } : d
-      ));
-      
-      setSelectedDoctor(prev => ({ ...prev, ...formattedData }));
-      setUpdateSuccess(true);
+      if (response.data.success) {
+        setDoctors(prev => prev.map(d => 
+          d._id === doctorId ? { ...d, ...formattedData } : d
+        ));
+        
+        setSelectedDoctor(prev => ({ ...prev, ...formattedData }));
+        setUpdateSuccess(true);
+      }
       
       setTimeout(() => {
         setIsEditMode(false);

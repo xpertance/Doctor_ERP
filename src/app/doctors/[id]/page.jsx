@@ -49,11 +49,11 @@
 //     const fetchDoctor = async () => {
 //       try {
 //         setIsLoading(true);
-//         let res = await fetch(`https://practo-backend.vercel.app/api/doctor/fetchOne/${id}`);
+//         let res = await fetch(`http://localhost:3001/api/doctor/fetchOne/${id}`);
         
 //         if (!res.ok) {
 //           console.log('Specific endpoint failed, trying fetchAll...');
-//           const allRes = await fetch('https://practo-backend.vercel.app/api/doctor/fetchAll');
+//           const allRes = await fetch('http://localhost:3001/api/doctor/fetchAll');
           
 //           if (!allRes.ok) {
 //             throw new Error(`API request failed with status ${allRes.status}`);
@@ -280,7 +280,7 @@
 //         patientId: userData.id,
 //       };
 
-//       const response = await fetch('https://practo-backend.vercel.app/api/appointment/create', {
+//       const response = await fetch('http://localhost:3001/api/appointment/create', {
 //         method: 'POST',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -851,30 +851,28 @@ export default function DoctorDetailsPage() {
     const fetchDoctor = async () => {
       try {
         setIsLoading(true);
-        let res = await fetch(`https://practo-backend.vercel.app/api/doctor/fetchOne/${id}`);
+        let res = await fetch(`http://localhost:3001/api/v1/doctor/fetch-by-id/${id}`);
+        const data = await res.json();
         
-        if (!res.ok) {
-          console.log('Specific endpoint failed, trying fetchAll...');
-          const allRes = await fetch('https://practo-backend.vercel.app/api/doctor/fetchAll');
-          
-          if (!allRes.ok) {
-            throw new Error(`API request failed with status ${allRes.status}`);
-          }
-          
-          const data = await allRes.json();
-          const foundDoctor = data.doctors?.find(doc => doc._id === id);
-          
-          if (!foundDoctor) {
-            throw new Error('Doctor not found in fetchAll response');
-          }
-          
-          setDoctor(foundDoctor);
-        } else {
-          const data = await res.json();
-          if (!data.doctor) {
+        if (data.success) {
+          if (!data.data.doctor) {
             throw new Error('Doctor data not found in response');
           }
-          setDoctor(data.doctor);
+          setDoctor(data.data.doctor);
+        } else {
+          console.log('Specific endpoint failed or returned error, trying fetchAll...');
+          const allRes = await fetch('http://localhost:3001/api/v1/doctor/fetchAll');
+          const allData = await allRes.json();
+          
+          if (allData.success) {
+            const foundDoctor = allData.data.doctors?.find(doc => doc._id === id);
+            if (!foundDoctor) {
+              throw new Error('Doctor not found in fetchAll response');
+            }
+            setDoctor(foundDoctor);
+          } else {
+            throw new Error(allData.message || 'Failed to fetch doctor data');
+          }
         }
       } catch (err) {
         console.error('Error fetching doctor:', err.message);
@@ -913,17 +911,18 @@ export default function DoctorDetailsPage() {
       setSlotError(null);
       
       try {
-        const response = await fetch(`https://practo-backend.vercel.app/api/appointment/already-booked/${doctor._id}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch availability data');
-        }
-        
+        const response = await fetch(`http://localhost:3001/api/v1/appointment/already-booked/${doctor._id}`);
         const data = await response.json();
-        setBookedSlots(data.slots || {});
+        
+        if (data.success) {
+          setBookedSlots(data.data.slots || {});
+        } else {
+          throw new Error(data.message || 'Failed to fetch availability data');
+        }
       } catch (error) {
         console.error('Error fetching booked slots:', error);
         setSlotError('Failed to load availability. Please try again.');
+        setBookedSlots({});
       } finally {
         setIsLoadingSlots(false);
       }
@@ -956,19 +955,14 @@ export default function DoctorDetailsPage() {
 
   const checkAvailability = async (doctorId, date, time) => {
     try {
-      const response = await fetch(`https://practo-backend.vercel.app/api/appointment/already-booked/${doctorId}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch availability data');
-      }
-      
+      const response = await fetch(`http://localhost:3001/api/v1/appointment/already-booked/${doctorId}`);
       const data = await response.json();
       
-      if (data.slots[date] && data.slots[date].includes(time)) {
+      if (data.success && data.data.slots[date] && data.data.slots[date].includes(time)) {
         return false;
       }
       
-      return true;
+      return data.success;
     } catch (error) {
       console.error('Error checking availability:', error);
       return false;
@@ -1080,7 +1074,7 @@ export default function DoctorDetailsPage() {
         patientId: userData.id,
       };
 
-      const response = await fetch('https://practo-backend.vercel.app/api/appointment/create', {
+      const response = await fetch('http://localhost:3001/api/v1/appointment/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1090,7 +1084,7 @@ export default function DoctorDetailsPage() {
 
       const result = await response.json();
 
-      if (!response.ok) throw new Error(result.message || 'Failed to create appointment');
+      if (!result.success) throw new Error(result.message || 'Failed to create appointment');
 
       setBookingSuccess(true);
       setTimeout(() => {

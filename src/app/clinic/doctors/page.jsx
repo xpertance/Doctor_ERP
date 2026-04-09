@@ -49,7 +49,7 @@
 //   const fetchDoctors = async (id) => {
 //     setIsLoading(true);
 //     try {
-//       const response = await fetch(`https://practo-backend.vercel.app/api/clinic/fetch-doctor-clinicId/${id}`);
+//       const response = await fetch(`http://localhost:3001/api/clinic/fetch-doctor-clinicId/${id}`);
 //       if (!response.ok) throw new Error('Failed to fetch doctors');
 //       const data = await response.json();
       
@@ -484,36 +484,39 @@ export default function DoctorsPage() {
   const fetchDoctors = async (id) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`https://practo-backend.vercel.app/api/clinic/fetch-doctor-clinicId/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch doctors');
-      const data = await response.json();
+      const response = await fetch(`http://localhost:3001/api/v1/clinic/fetch-doctor-clinicId/${id}`);
+      const responseData = await response.json();
       
-      const transformedDoctors = data.doctor.map(doc => ({
-        id: doc._id || doc.id,
-        name: `${doc.firstName} ${doc.lastName}`,
-        specialty: doc.specialty,
-        experience: `${doc.experience} Years`,
-        rating: 4.5,
-        location: doc.homeAddress,
-        availability: doc.available?.days || ['Mon', 'Wed', 'Fri'],
-        degrees: doc.qualifications || [],
-        fee: `₹${doc.consultantFee}`,
-        status: doc.status || "Active",
-        phone: doc.phone,
-        email: doc.email,
-        image: doc.profileImage || '/doctors/default-doctor.jpg',
-        bio: `Specialist in ${doc.specialty} with ${doc.experience} years of experience at ${doc.hospital}.`,
-        languages: ['English', 'Hindi'],
-        gender: doc.gender,
-        dateOfBirth: doc.dateOfBirth,
-        licenseNumber: doc.licenseNumber,
-        hospital: doc.hospital,
-        hospitalAddress: doc.hospitalAddress,
-        sessionTime: doc.sessionTime,
-        supSpeciality: doc.supSpeciality
-      }));
-      
-      setDoctors(transformedDoctors);
+      if (responseData.success) {
+        const transformedDoctors = responseData.data.doctors.map(doc => ({
+          id: doc._id || doc.id,
+          name: `${doc.firstName} ${doc.lastName}`,
+          specialty: doc.specialty,
+          experience: `${doc.experience} Years`,
+          rating: 4.5,
+          location: doc.homeAddress,
+          availability: doc.available?.days || ['Mon', 'Wed', 'Fri'],
+          degrees: doc.qualifications || [],
+          fee: `₹${doc.consultantFee}`,
+          status: doc.status || "Active",
+          phone: doc.phone,
+          email: doc.email,
+          image: doc.profileImage || '/doctors/default-doctor.jpg',
+          bio: `Specialist in ${doc.specialty} with ${doc.experience} years of experience at ${doc.hospital}.`,
+          languages: ['English', 'Hindi'],
+          gender: doc.gender,
+          dateOfBirth: doc.dateOfBirth,
+          licenseNumber: doc.licenseNumber,
+          hospital: doc.hospital,
+          hospitalAddress: doc.hospitalAddress,
+          sessionTime: doc.sessionTime,
+          supSpeciality: doc.supSpeciality
+        }));
+        
+        setDoctors(transformedDoctors);
+      } else {
+        console.error('Failed to fetch doctors:', responseData.message);
+      }
     } catch (err) {
       console.error('Error fetching doctors:', err);
     } finally {
@@ -547,14 +550,18 @@ export default function DoctorsPage() {
 
   const confirmDelete = async () => {
     try {
-      const response = await fetch(`https://practo-backend.vercel.app/api/clinic/delete-doctor/${selectedDoctor.id}`, {
+      const response = await fetch(`http://localhost:3001/api/v1/doctor/delete-by-id/${selectedDoctor.id}`, {
         method: 'DELETE'
       });
       
-      if (!response.ok) throw new Error('Failed to delete doctor');
+      const responseData = await response.json();
       
-      setDoctors(doctors.filter(d => d.id !== selectedDoctor.id));
-      setShowDeleteConfirm(false);
+      if (responseData.success) {
+        setDoctors(doctors.filter(d => d.id !== selectedDoctor.id));
+        setShowDeleteConfirm(false);
+      } else {
+        alert(responseData.message || 'Failed to delete doctor');
+      }
     } catch (err) {
       console.error('Error deleting doctor:', err);
     }

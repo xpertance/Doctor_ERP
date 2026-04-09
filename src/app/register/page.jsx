@@ -90,7 +90,7 @@ export default function RegistrationPortal() {
 
   const checkEmailAvailability = async (email) => {
     try {
-      const response = await fetch('https://practo-backend.vercel.app/api/check-email', {
+      const response = await fetch('http://localhost:3001/api/v1/auth/check-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -102,8 +102,8 @@ export default function RegistrationPortal() {
         throw new Error('Network response was not ok');
       }
 
-      const data = await response.json();
-      if (!data.available) {
+      const responseData = await response.json();
+      if (!responseData.success || !responseData.data.available) {
         return `This email is already registered `;
       }
       return null;
@@ -276,7 +276,7 @@ export default function RegistrationPortal() {
     if (currentPatientStep === 3) {
       setIsPatientLoading(true);
       try {
-        const response = await fetch('https://practo-backend.vercel.app/api/patients/register', {
+        const response = await fetch('http://localhost:3001/api/v1/patient/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -284,9 +284,9 @@ export default function RegistrationPortal() {
           body: JSON.stringify(patientFormData)
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          console.log('Registration successful:', result);
+        const responseData = await response.json();
+        if (responseData.success) {
+          console.log('Registration successful:', responseData.data);
           setPatientRegistrationSuccess(true);
 
           setTimeout(() => {
@@ -307,9 +307,8 @@ export default function RegistrationPortal() {
             setPatientRegistrationSuccess(false);
           }, 2000);
         } else {
-          const error = await response.json();
-          console.error('Registration failed:', error);
-          alert(`Registration failed: ${error.message || 'Server Error'}`);
+          console.error('Registration failed:', responseData.message);
+          alert(`Registration failed: ${responseData.message || 'Server Error'}`);
           setIsPatientLoading(false);
         }
       } catch (err) {
@@ -622,7 +621,7 @@ const handleDoctorInputChange = (field, value) => {
     };
 
     try {
-      const response = await fetch('https://practo-backend.vercel.app/api/doctor/register', {
+      const response = await fetch('http://localhost:3001/api/v1/doctor/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -630,15 +629,11 @@ const handleDoctorInputChange = (field, value) => {
         body: JSON.stringify(cleanedData),
       });
 
-      const data = await response.json();
+      const responseData = await response.json();
 
-      if (!response.ok) {
-        console.error('API Error:', data.message);
-        return;
-      }
-
-      console.log('Submission successful:', data);
-      setDoctorSuccess(true);
+      if (responseData.success) {
+        console.log('Submission successful:', responseData.data);
+        setDoctorSuccess(true);
 
       // Reset form and close modal after 2 seconds
       setTimeout(() => {
@@ -689,6 +684,10 @@ const handleDoctorInputChange = (field, value) => {
         setShowDoctorModal(false);
         router.push('/login'); // Redirect to login page
       }, 2000);
+    } else {
+      console.error('Submission failed:', responseData.message);
+      alert(`Registration failed: ${responseData.message || 'Please try again'}`);
+    }
     } catch (error) {
       console.error('Submission error:', error);
     } finally {
@@ -1014,21 +1013,17 @@ const handleDoctorInputChange = (field, value) => {
 
     // Here you would typically make your API call
     try {
-      const response = await fetch('https://practo-backend.vercel.app/api/clinic/register', {
+      const response = await fetch('http://localhost:3001/api/v1/clinic/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(clinicFormData)
       });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
-      }
-
-      const data = await response.json();
-      console.log('Registration successful:', data);
-      setClinicRegistrationSuccess(true);
+      const responseData = await response.json();
+      if (responseData.success) {
+        console.log('Registration successful:', responseData.data);
+        setClinicRegistrationSuccess(true);
 
       // Reset form after success
       setTimeout(() => {
@@ -1062,7 +1057,11 @@ const handleDoctorInputChange = (field, value) => {
         setCurrentClinicStep(0);
         setShowClinicModal(false);
       }, 2000);
-    } catch (error) {
+    } else {
+      console.error('Registration failed:', responseData.message);
+      alert(`Registration failed: ${responseData.message || 'Please try again'}`);
+    }
+    } catch (err) {
       console.error('Error submitting clinic form:', err);
       alert(`Registration failed: ${err.message || 'Please try again'}`);
     } finally {
@@ -1093,7 +1092,7 @@ const handleDoctorInputChange = (field, value) => {
   //   }
 
   //   // try {
-  //   //   const response = await fetch('https://practo-backend.vercel.app/api/clinic/register', {
+  //   //   const response = await fetch('http://localhost:3001/api/clinic/register', {
   //   //     method: 'POST',
   //   //     headers: {
   //   //       'Content-Type': 'application/json',

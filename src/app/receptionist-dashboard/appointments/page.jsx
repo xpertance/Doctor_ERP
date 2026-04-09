@@ -53,7 +53,7 @@ const AppointmentsDashboard = () => {
 
   const fetchAppointments = async (receptionistId) => {
     try {
-      const res = await fetch("https://practo-backend.vercel.app/api/appointment/fetchtoreceptinist", {
+      const res = await fetch("http://localhost:3001/api/v1/appointment/fetchtoreceptinist", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,8 +61,12 @@ const AppointmentsDashboard = () => {
         body: JSON.stringify({ receptionistId }),
       });
 
-      const data = await res.json();
-      setApp(data.appointments)
+      const responseData = await res.json();
+      if (responseData.success) {
+        setApp(responseData.data.appointments || []);
+      } else {
+        console.error("Failed to fetch appointments:", responseData.message);
+      }
     } catch (error) {
       console.error("Error fetching appointments:", error.message);
       return [];
@@ -74,7 +78,7 @@ const AppointmentsDashboard = () => {
     console.log(newStatus)
     setIsUpdatingStatus(true);
     try {
-      const res = await fetch("https://practo-backend.vercel.app/api/appointment/updateStatus", {
+      const res = await fetch("http://localhost:3001/api/v1/appointment/updateStatus", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

@@ -24,7 +24,7 @@ const ReceptionistLogin = () => {
 
     try {
       // Simulate API call
-      const response = await fetch('https://practo-backend.vercel.app/api/receptionist-login', {
+      const response = await fetch('http://localhost:3001/api/v1/auth/receptionist-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,16 +32,15 @@ const ReceptionistLogin = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!response.ok) {
-        throw new Error('Invalid credentials');
+      const responseData = await response.json();
+      
+      if (responseData.success && responseData.data) {
+        console.log('Login successful:', responseData);
+        login(responseData.data.token, responseData.data.staff);
+        router.push("/receptionist-dashboard");
+      } else {
+        throw new Error(responseData.message || 'Invalid credentials');
       }
-
-      const data = await response.json();
-      console.log('Login successful:', data);
-      login(data.token, data.staff);
-       router.push("/receptionist-dashboard");
-      // Handle successful login (redirect, store token, etc.)
-      // window.location.href = '/receptionist/dashboard';
       
     } catch (err) {
       setError(err.message || 'Login failed. Please try again.');

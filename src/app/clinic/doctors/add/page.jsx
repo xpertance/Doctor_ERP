@@ -74,9 +74,15 @@ const identityProofRef = useRef(null);
 
   const fetchUserData = async (id) => {
     try {
-      const res = await fetch(`https://practo-backend.vercel.app/api/clinic/fetchProfileData/${id}`);
+      const res = await fetch(`http://localhost:3001/api/v1/clinic/fetchProfileData/${id}`);
       if (!res.ok) throw new Error('Failed to fetch doctor info');
-      const data = await res.json();
+      const responseData = await res.json();
+      
+      if (!responseData.success) {
+        throw new Error(responseData.message || 'Failed to fetch clinic info');
+      }
+
+      const data = responseData.data;
      
       setFormData(prev => ({
         ...prev,
@@ -235,7 +241,7 @@ const handleIdentityProofChange = async (e) => {
   }
 
   try {
-    const response = await axios.post('https://practo-backend.vercel.app/api/check-email', { 
+    const response = await axios.post('http://localhost:3001/api/v1/auth/check-email', { 
       email 
     }, {
       headers: {
@@ -243,8 +249,8 @@ const handleIdentityProofChange = async (e) => {
       }
     });
 
-    if (!response.data.available) {
-      return `This email is already registered as a ${response.data.existsIn}`;
+    if (!response.data.success || !response.data.data.available) {
+      return `This email is already registered as a ${response.data.data.existsIn || 'user'}`;
     }
     return '';
   } catch (error) {
@@ -292,13 +298,13 @@ const apiData = {
 };
     console.log('Submitting data:', apiData);
     
-     const response = await axios.post('https://practo-backend.vercel.app/api/clinic/doctor-add', apiData);
+     const response = await axios.post('http://localhost:3001/api/v1/clinic/doctor-add', apiData);
     
     // Axios puts the response data in response.data
-    console.log('Response:', response.data);
+    const responseData = response.data;
     
-    if (response.status === 201) {
-      alert(response.data.message || "Doctor Added Successfully");
+    if (responseData.success) {
+      alert(responseData.message || "Doctor Added Successfully");
       
       // Reset form
       setFormData({

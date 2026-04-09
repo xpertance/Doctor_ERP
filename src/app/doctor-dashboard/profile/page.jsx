@@ -275,7 +275,7 @@
 //   };
 // const updateDoctorProfile = async (doctorId, updatedData) => {
 //     try {
-//       const response = await fetch(`https://practo-backend.vercel.app/api/doctor/update-by-id/${doctorId}`, {
+//       const response = await fetch(`http://localhost:3001/api/doctor/update-by-id/${doctorId}`, {
 //         method: 'PUT',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -1013,7 +1013,7 @@ const DoctorProfilePage = () => {
 
   const updateDoctorProfile = async (doctorId, updatedData) => {
     try {
-      const response = await fetch(`https://practo-backend.vercel.app/api/doctor/update-by-id/${doctorId}`, {
+      const response = await fetch(`http://localhost:3001/api/v1/doctor/update-by-id/${doctorId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -1021,11 +1021,12 @@ const DoctorProfilePage = () => {
         body: JSON.stringify(updatedData),
       });
       
-      if (!response.ok) {
-        throw new Error('Failed to update doctor profile');
+      const responseData = await response.json();
+      if (!responseData.success) {
+        throw new Error(responseData.message || 'Failed to update doctor profile');
       }
       
-      return await response.json();
+      return responseData;
     } catch (error) {
       console.error('Error updating doctor profile:', error);
       throw error;
@@ -1056,13 +1057,17 @@ const DoctorProfilePage = () => {
         consultantFee: formData.professionalInfo.consultationFee
       };
 
-      const updatedDoctor = await updateDoctorProfile(doctor.doctor._id, updatedData);
+      // Call the API to update the data
+      const result = await updateDoctorProfile(doctor.doctor._id, updatedData);
       
-      // Update doctorData with the new form data
-      setDoctorData(JSON.parse(JSON.stringify(formData)));
-      console.log("Profile updated successfully:", updatedDoctor);
-      
-      setIsEditing(false);
+      if (result.success) {
+        // Update local state with the response
+        setDoctorData({ ...formData });
+        console.log("Profile updated successfully:", result.data.doctor);
+        
+        // Exit edit mode
+        setIsEditing(false);
+      }
     } catch (error) {
       setError("Failed to update profile. Please try again.");
       console.error("Failed to update profile:", error);

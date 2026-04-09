@@ -51,7 +51,7 @@ const handleSubmit = async (e) => {
 
       console.log('Submitting data:', submissionData);
 
-      const response = await fetch('https://practo-backend.vercel.app/api/patients/register', {
+      const response = await fetch('http://localhost:3001/api/v1/patient/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,25 +63,25 @@ const handleSubmit = async (e) => {
       const result = await response.json();
       console.log('Response:', result);
 
-      if (!response.ok) {
+      if (result.success) {
+        alert('Registration successful!');
+        // Reset form and state
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          dob: '',
+          gender: '',
+          bloodType: '',
+          password: '',
+          confirmPassword: ''
+        });
+        setCurrentStep(1);
+        window.location.href = '/login';
+      } else {
         throw new Error(result.message || 'Registration failed');
       }
-
-      alert('Registration successful!');
-      // Reset form and state
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        dob: '',
-        gender: '',
-        bloodType: '',
-        password: '',
-        confirmPassword: ''
-      });
-      setCurrentStep(1);
-      
     } catch (err) {
       console.error('Registration error:', err);
       alert(`Error: ${err.message}`);

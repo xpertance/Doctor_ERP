@@ -220,7 +220,7 @@
 //       setIsLoading(true);
 //       setError(null);
 //       try {
-//         const response = await fetch('https://practo-backend.vercel.app/api/doctor/fetchAll');
+//         const response = await fetch('http://localhost:3001/api/doctor/fetchAll');
 //         if (!response.ok) {
 //           throw new Error('Failed to fetch doctors');
 //         }
@@ -517,11 +517,14 @@ export default function HeroSection() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch('https://practo-backend.vercel.app/api/doctor/fetchAll');
-        if (!response.ok) throw new Error('Failed to fetch doctors');
-        const data = await response.json();
-        setDoctors(data.doctors);
-        setFilteredDoctors(data.doctors);
+        const response = await fetch('http://localhost:3001/api/v1/doctor/fetchAll');
+        const result = await response.json();
+        if (result.success) {
+          setDoctors(result.data.doctors);
+          setFilteredDoctors(result.data.doctors);
+        } else {
+          throw new Error(result.message || 'Failed to fetch doctors');
+        }
       } catch (err) {
         setError(err.message);
       } finally {

@@ -41,7 +41,7 @@
 
 //   const fetchAppointmentsByDoc = async (doctorId) => {
 //     try {
-//       const res = await fetch(`https://practo-backend.vercel.app/api/appointment/fetchbydoctor/${doctorId}`);
+//       const res = await fetch(`http://localhost:3001/api/appointment/fetchbydoctor/${doctorId}`);
 //       if (!res.ok) {
 //         throw new Error('Failed to fetch appointments');
 //       }
@@ -184,7 +184,7 @@
 
 //   try {
 //     // First update the prescription data
-//     const prescriptionResponse = await fetch('https://practo-backend.vercel.app/api/appointment/addMedicines', {
+//     const prescriptionResponse = await fetch('http://localhost:3001/api/appointment/addMedicines', {
 //       method: 'PATCH',
 //       headers: {
 //         'Content-Type': 'application/json',
@@ -201,7 +201,7 @@
 //     }
 
 //     // Then update the status to 'checkedIn'
-//     const statusResponse = await fetch('https://practo-backend.vercel.app/api/appointment/updateStatus', {
+//     const statusResponse = await fetch('http://localhost:3001/api/appointment/updateStatus', {
 //       method: 'PATCH',
 //       headers: {
 //         'Content-Type': 'application/json',
@@ -647,10 +647,14 @@ const DoctorAppointmentsDashboard = () => {
 
   const fetchAppointmentsByDoc = async (doctorId) => {
     try {
-      const res = await fetch(`https://practo-backend.vercel.app/api/appointment/fetchbydoctor/${doctorId}`);
-      if (!res.ok) throw new Error('Failed to fetch appointments');
-      const response = await res.json();
-      setAppointments(response.data || []);
+      const res = await fetch(`http://localhost:3001/api/v1/appointment/fetchbydoctor/${doctorId}`);
+      const responseData = await res.json();
+      
+      if (responseData.success) {
+        setAppointments(responseData.data.appointments || []);
+      } else {
+        console.error('Failed to fetch appointments:', responseData.message);
+      }
     } catch (error) {
       console.error("Error fetching appointments:", error);
     }
@@ -760,7 +764,7 @@ const DoctorAppointmentsDashboard = () => {
     }
 
     try {
-      const prescriptionResponse = await fetch('https://practo-backend.vercel.app/api/appointment/addMedicines', {
+      const prescriptionResponse = await fetch('http://localhost:3001/api/v1/appointment/addMedicines', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -770,15 +774,17 @@ const DoctorAppointmentsDashboard = () => {
         }),
       });
 
-      if (!prescriptionResponse.ok) throw new Error('Failed to update prescription');
+      const presData = await prescriptionResponse.json();
+      if (!presData.success) throw new Error(presData.message || 'Failed to update prescription');
 
-      const statusResponse = await fetch('https://practo-backend.vercel.app/api/appointment/updateStatus', {
+      const statusResponse = await fetch('http://localhost:3001/api/v1/appointment/updateStatus', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ appointmentId, status: 'checkedIn' }),
       });
 
-      if (!statusResponse.ok) throw new Error('Failed to update status');
+      const statusData = await statusResponse.json();
+      if (!statusData.success) throw new Error(statusData.message || 'Failed to update status');
 
       setAppointments(prev =>
         prev.map(appointment =>

@@ -40,17 +40,17 @@ export default function ClinicsManage() {
     const fetchClinics = async () => {
       try {
         setLoading(true)
-        const res = await fetch('https://practo-backend.vercel.app/api/clinic/fetch-all-clinics')
+        const res = await fetch('http://localhost:3001/api/v1/clinic/fetch-all-clinics')
 
         if (!res.ok) {
           throw new Error('Failed to fetch clinics')
         }
 
-        const data = await res.json()
-        if (data.success) {
-          setClinics(data.clinics)
+        const responseData = await res.json()
+        if (responseData.success) {
+          setClinics(responseData.data.clinics || [])
         } else {
-          throw new Error(data.message || 'Failed to fetch clinics')
+          throw new Error(responseData.message || 'Failed to fetch clinics')
         }
       } catch (err) {
         console.error('Error:', err)
@@ -166,7 +166,7 @@ export default function ClinicsManage() {
   const handleApproveClinic = async (id) => {
     try {
       setLoading(true);
-      const response = await fetch(`https://practo-backend.vercel.app/api/clinic/update-status/${id}`, {
+      const response = await fetch(`http://localhost:3001/api/v1/clinic/update-status/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -177,11 +177,10 @@ export default function ClinicsManage() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to approve clinic');
+      const responseData = await response.json();
+      if (!responseData.success) {
+        throw new Error(responseData.message || 'Failed to approve clinic');
       }
-
-      const data = await response.json();
 
       // Update local state with the updated clinic
       setClinics(clinics.map(clinic =>
@@ -204,7 +203,7 @@ export default function ClinicsManage() {
 
     try {
       setLoading(true);
-      const response = await fetch(`https://practo-backend.vercel.app/api/clinic/update-status/${selectedClinic._id}`, {
+      const response = await fetch(`http://localhost:3001/api/v1/clinic/update-status/${selectedClinic._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -217,11 +216,10 @@ export default function ClinicsManage() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to reject clinic');
+      const responseData = await response.json();
+      if (!responseData.success) {
+        throw new Error(responseData.message || 'Failed to reject clinic');
       }
-
-      const data = await response.json();
 
       // Update local state with the updated clinic
       setClinics(clinics.map(clinic =>

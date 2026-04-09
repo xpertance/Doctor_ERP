@@ -78,10 +78,13 @@ useEffect(() => {
     const fetchAppointments=async()=>{
       try{
         if (!userId) return; 
-        const res=await fetch(`https://practo-backend.vercel.app/api/appointment/fetch-by-patient/${userId}`)
-        const data= await res.json();
-        console.log("response is",data.data)
-        setAppointment(data.data)
+        const res=await fetch(`http://localhost:3001/api/v1/appointment/fetch-by-patient/${userId}`)
+        const responseData = await res.json();
+        if (responseData.success) {
+          setAppointment(responseData.data.appointments || []);
+        } else {
+          console.error("Failed to fetch appointments:", responseData.message);
+        }
 
       }catch(err){
         console.log("Internal Server Error",err)

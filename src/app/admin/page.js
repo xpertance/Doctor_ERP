@@ -14,19 +14,24 @@ export default function Dashboard() {
       try {
         setLoading(true)
         // Fetch doctors count
-        const doctorsResponse = await axios.get('https://practo-backend.vercel.app/api/doctor/fetchAll')
-        setDoctorsCount(doctorsResponse.data.doctors.length)
+        const doctorsResponse = await axios.get('http://localhost:3001/api/v1/doctor/fetchAll')
+        if (doctorsResponse.data.success) {
+          setDoctorsCount(doctorsResponse.data.data.doctors.length)
+        }
         
         // Fetch clinics count and recent clinics
-        const clinicsResponse = await axios.get('https://practo-backend.vercel.app/api/clinic/fetch-all-clinics')
-        setClinicsCount(clinicsResponse.data.clinics.length)
-        
-        // Get the 4 most recently added clinics (sorted by creation date)
-        const sortedClinics = [...clinicsResponse.data.clinics]
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-          .slice(0, 4)
-        
-        setRecentClinics(sortedClinics)
+        const clinicsResponse = await axios.get('http://localhost:3001/api/v1/clinic/fetch-all-clinics')
+        if (clinicsResponse.data.success) {
+          const clinics = clinicsResponse.data.data.clinics || [];
+          setClinicsCount(clinics.length)
+          
+          // Get the 4 most recently added clinics (sorted by creation date)
+          const sortedClinics = [...clinics]
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .slice(0, 4)
+          
+          setRecentClinics(sortedClinics)
+        }
       } catch (error) {
         console.error('Error fetching data:', error)
       } finally {

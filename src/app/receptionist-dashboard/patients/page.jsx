@@ -36,7 +36,7 @@ export default function PatientsPage() {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await fetch('https://practo-backend.vercel.app/api/patients/fetchAll');
+        const response = await fetch('http://localhost:3001/api/v1/patient/fetchAll');
         if (!response.ok) {
           throw new Error('Failed to fetch patients');
         }
@@ -110,7 +110,7 @@ export default function PatientsPage() {
     if (window.confirm('Are you sure you want to delete this patient?')) {
       try {
         const response = await fetch(
-          `https://practo-backend.vercel.app/api/patients/delete/${patientId}`,
+          `http://localhost:3001/api/v1/patient/delete/${patientId}`,
           {
             method: 'DELETE',
           }

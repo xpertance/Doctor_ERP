@@ -30,14 +30,19 @@ const DoctorAnalyticsDashboard = () => {
         setError(null);
         
         // Fetch all appointments for the doctor
-        const appointmentsRes = await fetch(`https://practo-backend.vercel.app/api/appointment/fetchbydoctor/${userId}`);
-        if (!appointmentsRes.ok) throw new Error('Failed to fetch appointments');
+        const appointmentsRes = await fetch(`http://localhost:3001/api/v1/appointment/fetchbydoctor/${userId}`);
         const appointmentsData = await appointmentsRes.json();
-        setAppointments(appointmentsData.data);
+        
+        if (appointmentsData.success) {
+          const appointments = appointmentsData.data.appointments || [];
+          setAppointments(appointments);
 
-        // Fetch all patients (assuming you can get them from appointments)
-        const uniquePatients = [...new Set(appointmentsData.data.map(a => a.patientId))];
-        setPatients(uniquePatients);
+          // Fetch all patients (assuming you can get them from appointments)
+          const uniquePatients = [...new Set(appointments.map(a => a.patientId))];
+          setPatients(uniquePatients);
+        } else {
+          throw new Error(appointmentsData.message || 'Failed to fetch appointments');
+        }
 
       } catch (err) {
         setError(err.message);

@@ -34,21 +34,25 @@ export default function ClinicSettings() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState({});
   const [activeTab, setActiveTab] = useState('basic');
   const fileInputRef = useRef(null);
 
- const fetchUserData = async (id) => {
+  const fetchUserData = async (id) => {
     try {
-      const res = await fetch(`https://practo-backend.vercel.app/api/clinic/fetchProfileData/${id}`);
-      if (!res.ok) throw new Error('Failed to fetch doctor info');
-      const data = await res.json();
-     
-      setFormData(data.clinic);
+      const res = await fetch(`http://localhost:3001/api/v1/clinic/fetchProfileData/${id}`);
+      const responseData = await res.json();
+      if (responseData.success && responseData.data) {
+        setFormData(responseData.data.clinic);
+      } else {
+        throw new Error(response.message || 'Failed to fetch clinic info');
+      }
     } catch (err) {
       console.error(err);
+      toast.error(err.message || 'Failed to fetch profile data');
     } finally {
-     
+      setIsLoading(false);
     }
   };
 

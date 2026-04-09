@@ -42,7 +42,7 @@ export default function AddPatientPage() {
     setError(null);
 
     try {
-      const response = await fetch('https://practo-backend.vercel.app/api/patients/create', {
+      const response = await fetch('http://localhost:3001/api/v1/patient/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

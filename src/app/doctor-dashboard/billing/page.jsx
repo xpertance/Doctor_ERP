@@ -42,39 +42,43 @@ export default function DoctorBilling() {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await fetch(`https://practo-backend.vercel.app/api/appointment/fetchbydoctor/${doctorId}`);
-      if (!res.ok) throw new Error('Failed to fetch appointments');
+      const res = await fetch(`http://localhost:3001/api/v1/appointment/fetchbydoctor/${doctorId}`);
       const response = await res.json();
       
-      // Convert checked-in appointments to billing format
-      const checkedInBills = response.data
-        .filter(app => app.status === 'checkedIn')
-        .map(app => ({
-          id: `INV-${app._id.substring(0, 8).toUpperCase()}`,
-          patientName: app.patientName,
-          patientId: app._id,
-          date: new Date(app.appointmentDate).toISOString().split('T')[0],
-          dueDate: new Date(new Date(app.appointmentDate).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          amount: (app.medicines?.reduce((sum, med) => sum + (med.price || 0), 0) || 0) + (app.consultationFee || 0),
-          status: 'Pending', // Default status for new bills
-          insurance: app.insuranceProvider || 'Self-Pay',
-          services: [
-            { 
-              code: 'CONSULT', 
-              description: 'Consultation Fee', 
-              quantity: 1, 
-              price: app.consultationFee || 0 
-            },
-            ...(app.medicines?.map(med => ({
-              code: med.code || 'MED-' + med.name.substring(0, 3).toUpperCase(),
-              description: med.name,
-              quantity: med.quantity || 1,
-              price: med.price || 0
-            })) || [])
-          ]
-        }));
-      
-      setBills(checkedInBills);
+      if (response.success) {
+        const appointments = response.data.appointments || [];
+        // Convert checked-in appointments to billing format
+        const checkedInBills = appointments
+          .filter(app => app.status === 'checkedIn')
+          .map(app => ({
+            id: `INV-${app._id.substring(0, 8).toUpperCase()}`,
+            patientName: app.patientName,
+            patientId: app._id,
+            date: new Date(app.appointmentDate).toISOString().split('T')[0],
+            dueDate: new Date(new Date(app.appointmentDate).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            amount: (app.medicines?.reduce((sum, med) => sum + (med.price || 0), 0) || 0) + (app.consultationFee || 0),
+            status: 'Pending', // Default status for new bills
+            insurance: app.insuranceProvider || 'Self-Pay',
+            services: [
+              { 
+                code: 'CONSULT', 
+                description: 'Consultation Fee', 
+                quantity: 1, 
+                price: app.consultationFee || 0 
+              },
+              ...(app.medicines?.map(med => ({
+                code: med.code || 'MED-' + med.name.substring(0, 3).toUpperCase(),
+                description: med.name,
+                quantity: med.quantity || 1,
+                price: med.price || 0
+              })) || [])
+            ]
+          }));
+        
+        setBills(checkedInBills);
+      } else {
+        setError(response.message || 'Failed to fetch appointments');
+      }
     } catch (err) {
       setError(err.message);
       console.error("Error fetching appointments:", err);

@@ -31,7 +31,7 @@ export default function LoginPage() {
 
   const handleLogin = async (values, { setSubmitting }) => {
     try {
-      const res = await fetch('https://practo-backend.vercel.app/api/onelogin', {
+      const res = await fetch('http://localhost:3001/api/v1/auth/onelogin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,12 +42,13 @@ export default function LoginPage() {
         }),
       });
 
-      const data = await res.json();
+      const response = await res.json();
 
-      if (res.ok) {
-        login(data.token, data.user);
+      if (response.success && response.data) {
+        const { token, user } = response.data;
+        login(token, user);
         
-        switch(data.user.role) {
+        switch(user.role) {
           case 'admin':
             router.push('/admin');
             break;
@@ -55,17 +56,13 @@ export default function LoginPage() {
             router.push('/doctor-dashboard');
             break;
           case 'clinic':
-           if(data.user.status=="pending"){
-        router.push(`/pending-request/${data.user.id}`);
-        
-      }else if(data.user.status=="rejected"){
-        router.push(`/rejected/${data.user.id}`);
-
-      }else{
+            if(user.status === "pending"){
+              router.push(`/pending-request/${user.id}`);
+            } else if(user.status === "rejected"){
+              router.push(`/rejected/${user.id}`);
+            } else {
               router.push('/clinic');
-
             }
-            
             break;
           case 'patient':
             router.push('/patient-dashboard');
@@ -77,7 +74,7 @@ export default function LoginPage() {
             router.push('/dashboard');
         }
       } else {
-        setError(data.message || 'Login failed');
+        setError(response.message || 'Login failed');
         setShowErrorModal(true);
       }
     } catch (err) {

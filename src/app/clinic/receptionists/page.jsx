@@ -49,19 +49,18 @@ const ReceptionistManagement = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`https://practo-backend.vercel.app/api/clinic/fetch-receptionist/${id}`);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch receptionists');
+      const response = await fetch(`http://localhost:3001/api/v1/clinic/fetch-receptionist/${id}`);
+      const responseData = await response.json();
+
+      if (!responseData.success) {
+        throw new Error(responseData.message || 'Failed to fetch receptionists');
       }
 
-      const data = await response.json();
-      if (!data.staff || !Array.isArray(data.staff)) {
+      if (!responseData.data.staff || !Array.isArray(responseData.data.staff)) {
         throw new Error('Invalid data format received from server');
       }
 
-      setReceptionists(data.staff);
+      setReceptionists(responseData.data.staff);
     } catch (err) {
       console.error('Error fetching receptionists:', err);
       setError(err.message || 'Failed to load receptionists. Please try again later.');
@@ -110,13 +109,14 @@ const ReceptionistManagement = () => {
 
     setDeleteLoading(true);
     try {
-      const response = await fetch(`https://practo-backend.vercel.app/api/reciptionist/delete/${id}`, {
+      const response = await fetch(`http://localhost:3001/api/v1/receptionist/delete/${id}`, {
         method: 'DELETE',
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete receptionist');
+      const responseData = await response.json();
+
+      if (!responseData.success) {
+        throw new Error(responseData.message || 'Failed to delete receptionist');
       }
 
       setReceptionists(prev => prev.filter(r => r._id !== id));
@@ -193,7 +193,7 @@ const ReceptionistManagement = () => {
       let response;
       if (currentReceptionist) {
         // Update existing receptionist
-        response = await fetch(`https://practo-backend.vercel.app/api/reciptionist/update-by-id/${currentReceptionist._id}`, {
+        response = await fetch(`http://localhost:3001/api/v1/receptionist/update-by-id/${currentReceptionist._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -202,7 +202,7 @@ const ReceptionistManagement = () => {
         });
       } else {
         // Create new receptionist
-        response = await fetch('https://practo-backend.vercel.app/api/clinic/add-receptinist', {
+        response = await fetch('http://localhost:3001/api/v1/clinic/add-receptinist', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -211,12 +211,13 @@ const ReceptionistManagement = () => {
         });
       }
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save receptionist');
+      const responseData = await response.json();
+
+      if (!responseData.success) {
+        throw new Error(responseData.message || 'Failed to save receptionist');
       }
 
-      const savedReceptionist = await response.json();
+      const savedReceptionist = responseData.data.staff || responseData.data.receptionist;
 
       if (currentReceptionist) {
         setReceptionists(prev => 

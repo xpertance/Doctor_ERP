@@ -40,7 +40,7 @@ export default function DynamicDashboard() {
     if (!userId) return;
     
     try {
-      const res = await fetch(`https://practo-backend.vercel.app/api/patients/fetch-by-id/${userId}`);
+      const res = await fetch(`http://localhost:3001/api/v1/patient/fetch-by-id/${userId}`);
       const data = await res.json();
       
       if (data.patient) {
@@ -55,7 +55,7 @@ export default function DynamicDashboard() {
     if (!userId) return;
     
     try {
-      const res = await fetch(`https://practo-backend.vercel.app/api/appointments/patient/${userId}`);
+      const res = await fetch(`http://localhost:3001/api/v1/appointment/patient/${userId}`);
       const data = await res.json();
       
       if (data.success) {

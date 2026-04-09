@@ -22,7 +22,7 @@
 //   const [error, setError] = useState(null);
 // const fetchClinicImages = async () => {
 //     try {
-//       const response = await fetch(`https://practo-backend.vercel.app/api/clinic/fetch-images/${userID}`, {
+//       const response = await fetch(`http://localhost:3001/api/clinic/fetch-images/${userID}`, {
 //         method: 'GET',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -108,7 +108,7 @@
 //       const cloudinaryUrl = await uploadImageToCloudinary(file);
 // console.log(cloudinaryUrl);
 //       // 2. Save URL to your backend API
-//       const response = await fetch(`https://practo-backend.vercel.app/api/clinic/add-image/${userID}`, {
+//       const response = await fetch(`http://localhost:3001/api/clinic/add-image/${userID}`, {
 //         method: 'PATCH',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -279,19 +279,14 @@ export default function ManageImages() {
     try {
       if (!userID) return;
 
-      const response = await fetch(`https://practo-backend.vercel.app/api/clinic/fetch-images/${userID}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(`http://localhost:3001/api/v1/clinic/fetch-images/${userID}`);
+      const responseData = await response.json();
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch images');
+      if (responseData.success) {
+        setImages(responseData.data.images || []);
+      } else {
+        setError(responseData.message || 'Failed to fetch images');
       }
-
-      const data = await response.json();
-      setImages(data.images || []);
     } catch (error) {
       console.error('Error fetching clinic images:', error);
       setError('Failed to load images. Please try again later.');
@@ -352,7 +347,7 @@ export default function ManageImages() {
   const confirmDelete = async () => {
     try {
       // Call API to delete image from backend
-      const response = await fetch(`https://practo-backend.vercel.app/api/clinic/remove-image/${userID}`, {
+      const response = await fetch(`http://localhost:3001/api/v1/clinic/delete-image/${userID}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -360,12 +355,13 @@ export default function ManageImages() {
         body: JSON.stringify({ imageUrl: imgToDelete }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete image from server');
-      }
+      const responseData = await response.json();
 
-      // Update local state if API call succeeds
-      setImages(images.filter((img) => img !== imgToDelete));
+      if (responseData.success) {
+        setImages(responseData.data.images || images.filter((img) => img !== imgToDelete));
+      } else {
+        setError(responseData.message || 'Failed to delete image');
+      }
     } catch (err) {
       console.error('Error deleting image:', err);
       setError('Failed to delete image. Please try again.');
@@ -399,7 +395,7 @@ export default function ManageImages() {
 
         const cloudinaryUrl = await uploadImageToCloudinary(file);
         
-        const response = await fetch(`https://practo-backend.vercel.app/api/clinic/add-image/${userID}`, {
+        const response = await fetch(`http://localhost:3001/api/v1/clinic/add-image/${userID}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -407,11 +403,13 @@ export default function ManageImages() {
           body: JSON.stringify({ imageUrl: cloudinaryUrl }),
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to save image URL to backend');
-        }
+        const responseData = await response.json();
 
-        setImages((prev) => [...prev, cloudinaryUrl]);
+        if (responseData.success) {
+          setImages(responseData.data.images || (prev => [...prev, cloudinaryUrl]));
+        } else {
+          throw new Error(responseData.message || 'Failed to save image URL');
+        }
       }
     } catch (error) {
       console.error('Error uploading images:', error);

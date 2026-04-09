@@ -15,10 +15,10 @@ export default function RejectedPage() {
     const fetchUser = async () => {
       try {
         // Replace with your actual API endpoint
-        const response = await fetch(`https://practo-backend.vercel.app/api/clinic/fetch-by-id/${userId}`);
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
+        const response = await fetch(`http://localhost:3001/api/v1/clinic/fetch-by-id/${userId}`);
+        const result = await response.json();
+        if (result.success) {
+          setUser(result.data.clinic);
         }
       } catch (error) {
         console.error('Error fetching user:', error);

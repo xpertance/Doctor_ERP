@@ -403,39 +403,42 @@ const PatientManagementPage = () => {
 
   const fetchAppointmentsByDoc = async (doctorId) => {
     try {
-      const res = await fetch(`https://practo-backend.vercel.app/api/appointment/fetchbydoctor/${doctorId}`);
-      if (!res.ok) throw new Error('Failed to fetch appointments');
+      const res = await fetch(`http://localhost:3001/api/v1/appointment/fetchbydoctor/${doctorId}`);
       const response = await res.json();
-      const checkedInPatients = response.data
-        .filter(app => app.status === 'checkedIn')
-        .map(app => ({
-          _id: app._id,
-          id: app._id,
-          name: app.patientName,
-          age: app.patientAge || 0,
-          gender: app.patientDetails?.gender || 'Unknown',
-          phone: app.patientNumber,
-          email: app.patientEmail || 'No email',
-          address: app.patientAddress || 'No address',
-          lastVisit: new Date(app.appointmentDate).toLocaleDateString(),
-          condition: app.patientNote || 'No condition specified',
-          status: 'Active',
-          bloodType: app.patientDetails?.bloodType || 'Unknown',
-          emergencyContact: app.patientEmergencyContact || 'Not provided',
-          prescriptions: app.medicines ? [{
-            date: new Date(app.appointmentDate).toLocaleDateString(),
-            doctor: 'Dr. You',
-            medicines: app.medicines.map(med => ({
-              name: med.name || 'Unknown medicine',
-              dosage: med.dosage || 'As prescribed',
-              frequency: med.frequency || 'Daily',
-              duration: med.duration || 'Until finished'
-            })),
-            notes: app.description || 'No additional notes'
-          }] : []
-        }));
       
-      setPatients(checkedInPatients);
+      if (response.success) {
+        const appointments = response.data.appointments || [];
+        const checkedInPatients = appointments
+          .filter(app => app.status === 'checkedIn')
+          .map(app => ({
+            _id: app._id,
+            id: app._id,
+            name: app.patientName,
+            age: app.patientAge || 0,
+            gender: app.patientDetails?.gender || 'Unknown',
+            phone: app.patientNumber,
+            email: app.patientEmail || 'No email',
+            address: app.patientAddress || 'No address',
+            lastVisit: new Date(app.appointmentDate).toLocaleDateString(),
+            condition: app.patientNote || 'No condition specified',
+            status: 'Active',
+            bloodType: app.patientDetails?.bloodType || 'Unknown',
+            emergencyContact: app.patientEmergencyContact || 'Not provided',
+            prescriptions: app.medicines ? [{
+              date: new Date(app.appointmentDate).toLocaleDateString(),
+              doctor: 'Dr. You',
+              medicines: app.medicines.map(med => ({
+                name: med.name || 'Unknown medicine',
+                dosage: med.dosage || 'As prescribed',
+                frequency: med.frequency || 'Daily',
+                duration: med.duration || 'Until finished'
+              })),
+              notes: app.description || 'No additional notes'
+            }] : []
+          }));
+        
+        setPatients(checkedInPatients);
+      }
     } catch (error) {
       console.error("Error fetching appointments:", error);
     }

@@ -176,27 +176,43 @@ export default function ClinicRegistrationForm() {
     setIsSubmitting(true);
     
     try {
-      const formDataToSend = new FormData();
-      for (const key in formData) {
-        if (key === 'openingHours') {
-          formDataToSend.append(key, JSON.stringify(formData[key]));
-        } else if (key === 'logo' && formData[key]) {
-          formDataToSend.append(key, formData[key]);
-        } else {
-          formDataToSend.append(key, formData[key]);
-        }
+      // Format openingHours as per backend expectation
+      const formattedOpeningHours = {};
+      for (const [day, hours] of Object.entries(formData.openingHours)) {
+        formattedOpeningHours[day] = {
+          open: hours.open || '',
+          close: hours.close || '',
+        };
       }
+
+      const registrationData = {
+        ...formData,
+        openingHours: formattedOpeningHours,
+        // For now, we handle logo separately or as a placeholder if not using multipart
+        logo: formData.logo ? 'logo-placeholder' : null, 
+      };
+
+      const response = await fetch('http://localhost:3001/api/v1/clinic/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registrationData),
+      });
+
+      const result = await response.json();
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setSuccessMessage('Clinic registered successfully!');
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 2000);
+      if (result.success) {
+        setSuccessMessage('Clinic registered successfully! Waiting for admin approval.');
+        setTimeout(() => {
+          router.push('/login');
+        }, 3000);
+      } else {
+        throw new Error(result.message || 'Registration failed');
+      }
     } catch (error) {
       console.error('Registration error:', error);
-      setErrors({ submit: 'Failed to register clinic. Please try again.' });
+      setErrors({ submit: error.message || 'Failed to register clinic. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
