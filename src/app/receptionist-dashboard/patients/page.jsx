@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -30,7 +30,7 @@ import { useAuth } from '@/context/AuthContext';
 import { patientService } from '@/utils/patientService';
 import { appointmentService } from '@/utils/appointmentService';
 
-export default function PatientsPage() {
+function PatientsPageContent() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -797,5 +797,17 @@ export default function PatientsPage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function PatientsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
+        <p className="text-sm font-medium text-slate-500 animate-pulse">Loading Patients...</p>
+      </div>
+    }>
+      <PatientsPageContent />
+    </Suspense>
   );
 }
