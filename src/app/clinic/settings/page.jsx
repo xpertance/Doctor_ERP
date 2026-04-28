@@ -1,5 +1,5 @@
 'use client';
-
+import { API_BASE_URL } from '@/utils/api';
 import { useState, useEffect,useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
@@ -41,7 +41,7 @@ export default function ClinicSettings() {
 
   const fetchUserData = async (id) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/v1/clinic/fetchProfileData/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/clinic/fetchProfileData/${id}`);
       const responseData = await res.json();
       if (responseData.success && responseData.data) {
         setFormData(responseData.data.clinic);

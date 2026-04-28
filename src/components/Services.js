@@ -1,5 +1,4 @@
 'use client';
-
 import { Stethoscope, Pill, Calendar, Clipboard, Activity, HeartPulse } from 'lucide-react';
 import Link from 'next/link';
 

@@ -1,5 +1,5 @@
 'use client';
-
+import { API_BASE_URL } from '@/utils/api';
 import { useEffect, useState } from 'react';
 import { FiCalendar, FiPlus, FiX, FiClock, FiUser, FiMapPin, FiPhone, FiMail, FiInfo,FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 import Card from '@/components/Card';
@@ -78,7 +78,7 @@ useEffect(() => {
     const fetchAppointments=async()=>{
       try{
         if (!userId) return; 
-        const res=await fetch(`http://localhost:3001/api/v1/appointment/fetch-by-patient/${userId}`)
+        const res=await fetch(`${API_BASE_URL}/api/v1/appointment/fetch-by-patient/${userId}`)
         const responseData = await res.json();
         if (responseData.success) {
           setAppointment(responseData.data.appointments || []);

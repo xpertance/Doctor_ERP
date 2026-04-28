@@ -1,6 +1,6 @@
-// 'use client';
-
-// import { useState,useEffect } from 'react';
+'use client';
+import { API_BASE_URL } from '@/utils/api';
+// // import { useState,useEffect } from 'react';
 // import { Plus, Trash2 } from 'lucide-react';
 
 // const initialImages = [
@@ -22,7 +22,7 @@
 //   const [error, setError] = useState(null);
 // const fetchClinicImages = async () => {
 //     try {
-//       const response = await fetch(`http://localhost:3001/api/clinic/fetch-images/${userID}`, {
+//       const response = await fetch(`${API_BASE_URL}/api/clinic/fetch-images/${userID}`, {
 //         method: 'GET',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -108,7 +108,7 @@
 //       const cloudinaryUrl = await uploadImageToCloudinary(file);
 // console.log(cloudinaryUrl);
 //       // 2. Save URL to your backend API
-//       const response = await fetch(`http://localhost:3001/api/clinic/add-image/${userID}`, {
+//       const response = await fetch(`${API_BASE_URL}/api/clinic/add-image/${userID}`, {
 //         method: 'PATCH',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -259,8 +259,6 @@
 // }
 
 
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, ImageOff, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -279,7 +277,7 @@ export default function ManageImages() {
     try {
       if (!userID) return;
 
-      const response = await fetch(`http://localhost:3001/api/v1/clinic/fetch-images/${userID}`);
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-images/${userID}`);
       const responseData = await response.json();
 
       if (responseData.success) {
@@ -347,7 +345,7 @@ export default function ManageImages() {
   const confirmDelete = async () => {
     try {
       // Call API to delete image from backend
-      const response = await fetch(`http://localhost:3001/api/v1/clinic/delete-image/${userID}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/delete-image/${userID}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -395,7 +393,7 @@ export default function ManageImages() {
 
         const cloudinaryUrl = await uploadImageToCloudinary(file);
         
-        const response = await fetch(`http://localhost:3001/api/v1/clinic/add-image/${userID}`, {
+        const response = await fetch(`${API_BASE_URL}/api/v1/clinic/add-image/${userID}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

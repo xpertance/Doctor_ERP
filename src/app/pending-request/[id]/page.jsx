@@ -1,5 +1,5 @@
 'use client';
-
+import { API_BASE_URL } from '@/utils/api';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -15,7 +15,7 @@ export default function PendingRequestPage() {
     const fetchUser = async () => {
       try {
         // Replace with your actual API endpoint
-        const response = await fetch(`http://localhost:3001/api/v1/clinic/fetch-by-id/${userId}`);
+        const response = await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-by-id/${userId}`);
         const result = await response.json();
         if (result.success) {
           setUser(result.data.clinic);

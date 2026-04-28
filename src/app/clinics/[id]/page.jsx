@@ -1,5 +1,6 @@
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 
-'use client'
 import { motion } from 'framer-motion'
 import { MapPin, Star, Clock, Phone, Mail, Globe, ChevronLeft, HeartPulse, Stethoscope, Pill, User, Award, Calendar, X, ChevronRight, Map } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -30,7 +31,7 @@ export default function ClinicDetailsPage() {
 
       console.log('Fetching clinic with ID:', params.id)
       
-      const res = await fetch(`http://localhost:3001/api/v1/clinic/fetch-by-id/${params.id}`)
+      const res = await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-by-id/${params.id}`)
       const data = await res.json()
       
       if (data.success && data.data.clinic) {
@@ -55,7 +56,7 @@ export default function ClinicDetailsPage() {
 
       console.log('Fetching doctors for clinic ID:', params.id)
       
-      const res = await fetch(`http://localhost:3001/api/v1/clinic/fetch-doctor-clinicId/${params.id}`)
+      const res = await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-doctor-clinicId/${params.id}`)
       const data = await res.json()
 
       if (data.success) {

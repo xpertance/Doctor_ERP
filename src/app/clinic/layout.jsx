@@ -1,9 +1,10 @@
- 'use client'; 
- import { motion } from 'framer-motion';
+'use client';
+import { motion } from 'framer-motion';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { ROLES } from '@/constants/roles';
 import { 
   LayoutDashboard, 
   Users, 
@@ -42,7 +43,7 @@ export default function ClinicLayout({ children }) {
     try {
       const user = JSON.parse(userStr);
       setClinicData(user);
-      if (user.role !== "clinic") {
+      if (user.role !== ROLES.CLINIC) {
         router.push('/login');
       }
       // if(user.status=="pending"){
@@ -56,7 +57,7 @@ export default function ClinicLayout({ children }) {
       console.error('Invalid user data in localStorage');
       router.push('/login');
     }
-  }, [router]);
+  }, []);
 console.log("asdf",clinicData)
   const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/clinic', id: 'dashboard' },

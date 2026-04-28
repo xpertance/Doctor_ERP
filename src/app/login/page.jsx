@@ -1,5 +1,6 @@
-'use client'
+'use client';
 import { useState } from 'react';
+import { ROLES } from '@/constants/roles';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,6 +16,7 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -31,7 +33,7 @@ export default function LoginPage() {
 
   const handleLogin = async (values, { setSubmitting }) => {
     try {
-      const res = await fetch('http://localhost:3001/api/v1/auth/onelogin', {
+      const res = await fetch(`${API_BASE_URL}/api/v1/auth/onelogin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,13 +51,13 @@ export default function LoginPage() {
         login(token, user);
         
         switch(user.role) {
-          case 'admin':
+          case ROLES.ADMIN:
             router.push('/admin');
             break;
-          case 'doctor':
+          case ROLES.DOCTOR:
             router.push('/doctor-dashboard');
             break;
-          case 'clinic':
+          case ROLES.CLINIC:
             if(user.status === "pending"){
               router.push(`/pending-request/${user.id}`);
             } else if(user.status === "rejected"){
@@ -64,14 +66,14 @@ export default function LoginPage() {
               router.push('/clinic');
             }
             break;
-          case 'patient':
+          case ROLES.PATIENT:
             router.push('/patient-dashboard');
             break;
-          case 'Receptionist':
+          case ROLES.RECEPTIONIST:
             router.push('/receptionist-dashboard');
             break;
           default:
-            router.push('/dashboard');
+            router.push('/');
         }
       } else {
         setError(response.message || 'Login failed');

@@ -1,437 +1,243 @@
-'use client'
-
+'use client';
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Calendar, Users, Activity, Clock, TrendingUp, AlertCircle, Heart, Stethoscope, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { 
+  Calendar, Users, Activity, Clock, 
+  Stethoscope, User, ChevronRight, CheckCircle,
+  AlertCircle, ArrowRight, Pill, Play
+} from 'lucide-react';
+import { API_BASE_URL } from '@/utils/api';
 
-const DoctorAnalyticsDashboard = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState('week');
+const DoctorMainDashboard = () => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [appointments, setAppointments] = useState([]);
-  const [patients, setPatients] = useState([]);
   const [userId, setUserId] = useState('');
+  const [appointments, setAppointments] = useState([]);
+  const [queue, setQueue] = useState({ current: null, next: null, waitingList: [] });
+  const [stats, setStats] = useState({ total: 0, waiting: 0, completed: 0 });
 
-  // Fetch data from backend
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (user) {
-      const data = JSON.parse(user);
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const data = JSON.parse(userStr);
       setUserId(data?.id);
     }
   }, []);
 
-  useEffect(() => {
+  const fetchData = async () => {
     if (!userId) return;
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { 'Authorization': `Bearer ${token}` };
 
-    const fetchData = async () => {
+      // Parallel Fetching
+      const [queueRes, apptRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/v1/queue/${userId}`, { headers }),
+        fetch(`${API_BASE_URL}/api/v1/doctor/appointments`, { headers })
+      ]);
+
+      let queueJson = { success: false };
+      let apptJson = { success: false };
+
       try {
-        setIsLoading(true);
-        setError(null);
+        if (queueRes.ok) queueJson = await queueRes.json();
+      } catch (e) { console.error("Queue Parse Error", e); }
+
+      try {
+        if (apptRes.ok) apptJson = await apptRes.json();
+      } catch (e) { console.error("Appointment Parse Error", e); }
+
+      if (queueJson.success) setQueue(queueJson.data);
+      if (apptJson.success) {
+        const allAppts = apptJson.data || [];
+        setAppointments(allAppts);
         
-        // Fetch all appointments for the doctor
-        const appointmentsRes = await fetch(`http://localhost:3001/api/v1/appointment/fetchbydoctor/${userId}`);
-        const appointmentsData = await appointmentsRes.json();
-        
-        if (appointmentsData.success) {
-          const appointments = appointmentsData.data.appointments || [];
-          setAppointments(appointments);
-
-          // Fetch all patients (assuming you can get them from appointments)
-          const uniquePatients = [...new Set(appointments.map(a => a.patientId))];
-          setPatients(uniquePatients);
-        } else {
-          throw new Error(appointmentsData.message || 'Failed to fetch appointments');
-        }
-
-      } catch (err) {
-        setError(err.message);
-        console.error("Error fetching data:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [userId]);
-
-  // Process data for analytics based on available appointments
-  const processAnalyticsData = () => {
-    if (appointments.length === 0) return {
-      patientVisitsData: [],
-      conditionsData: [],
-      monthlyTrendsData: [],
-      appointmentStatusData: []
-    };
-
-    // Group appointments by day of week
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const visitsByDay = days.map(day => {
-      const dayAppointments = appointments.filter(a => {
-        const date = new Date(a.appointmentDate);
-        return date.toLocaleDateString('en-US', { weekday: 'short' }) === day;
-      });
-      return {
-        day,
-        visits: dayAppointments.length,
-        consultations: dayAppointments.filter(a => a.status === 'completed').length
-      };
-    });
-
-    // Extract conditions from appointments (assuming notes contain conditions)
-    const conditionsCount = {};
-    appointments.forEach(a => {
-      if (a.patientNote) {
-        const conditions = a.patientNote.split(',').map(c => c.trim());
-        conditions.forEach(c => {
-          conditionsCount[c] = (conditionsCount[c] || 0) + 1;
+        // Calculate simple stats
+        setStats({
+          total: allAppts.length,
+          waiting: allAppts.filter(a => a.status === 'checked_in' || a.status === 'checkedIn').length,
+          completed: allAppts.filter(a => a.status === 'completed').length
         });
       }
-    });
-
-    const topConditions = Object.entries(conditionsCount)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([name, count]) => ({
-        name,
-        value: count,
-        color: getRandomColor()
-      }));
-
-    // Group by month
-    const monthlyData = {};
-    appointments.forEach(a => {
-      const date = new Date(a.appointmentDate);
-      const month = date.toLocaleDateString('en-US', { month: 'short' });
-      if (!monthlyData[month]) {
-        monthlyData[month] = { patients: new Set(), revenue: 0 };
-      }
-      monthlyData[month].patients.add(a.patientId);
-      monthlyData[month].revenue += a.consultationFee || 0;
-    });
-
-    const monthlyTrends = Object.entries(monthlyData).map(([month, data]) => ({
-      month,
-      patients: data.patients.size,
-      revenue: data.revenue
-    }));
-
-    // Improved appointment status processing
-    const statusCounts = appointments.reduce((acc, a) => {
-      const status = a.status?.toLowerCase() || 'unknown';
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, {});
-
-    // Map to standard status names with better handling of different status names
-    const statusData = [
-      { status: 'Completed', count: statusCounts.completed || statusCounts.checkedin || statusCounts.done || 0, color: '#10B981' },
-      { status: 'Scheduled', count: statusCounts.scheduled || statusCounts.booked || statusCounts.pending || 0, color: '#3B82F6' },
-      { status: 'Cancelled', count: statusCounts.cancelled || statusCounts.canceled || 0, color: '#EF4444' },
-      { status: 'No Show', count: statusCounts.noshow || statusCounts['no-show'] || statusCounts.missed || 0, color: '#6B7280' }
-    ].filter(item => item.count > 0);  // Remove statuses with zero count
-
-    return {
-      patientVisitsData: visitsByDay,
-      conditionsData: topConditions,
-      monthlyTrendsData: monthlyTrends,
-      appointmentStatusData: statusData,
-      totalPatients: patients.length,
-      todaysAppointments: {
-        total: appointments.filter(a => isToday(new Date(a.appointmentDate))).length,
-        remaining: appointments.filter(a => 
-          isToday(new Date(a.appointmentDate)) && 
-          (a.status === 'scheduled' || a.status === 'booked' || a.status === 'pending')
-        ).length
-      }
-    };
+    } catch (error) {
+      console.error("Dashboard Fetch Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const isToday = (date) => {
-    const today = new Date();
-    return date.getDate() === today.getDate() &&
-           date.getMonth() === today.getMonth() &&
-           date.getFullYear() === today.getFullYear();
-  };
-
-  const getRandomColor = () => {
-    const colors = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
-
-  const { 
-    patientVisitsData, 
-    conditionsData, 
-    monthlyTrendsData, 
-    appointmentStatusData,
-    totalPatients,
-    todaysAppointments
-  } = processAnalyticsData();
+  useEffect(() => {
+    fetchData();
+    // Auto-refresh every 60 seconds
+    const interval = setInterval(fetchData, 60000);
+    return () => clearInterval(interval);
+  }, [userId]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex flex-col items-center">
-          <Loader2 className="animate-spin text-blue-600 mb-4" size={48} />
-          <p className="text-gray-700">Loading dashboard data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-xl shadow-lg max-w-md text-center">
-          <AlertCircle className="text-red-500 mx-auto mb-4" size={48} />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Error Loading Dashboard</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Retry
-          </button>
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-600 font-medium">Synchronizing Clinical Data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-                <Stethoscope className="text-blue-600" />
-                Doctor Analytics Dashboard
-              </h1>
-              <p className="text-gray-600 mt-2">Practice insights derived from your appointments</p>
-            </div>
-            <div className="flex gap-2">
-              {['week', 'month', 'year'].map((period) => (
-                <button
-                  key={period}
-                  onClick={() => setSelectedPeriod(period)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                    selectedPeriod === period
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+    <div className="min-h-screen bg-[#f8fafc] p-4 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* Top Operational Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatCard 
+            icon={<Calendar className="text-blue-600" />} 
+            label="Total Appointments" 
+            value={stats.total} 
+            color="blue"
+          />
+          <StatCard 
+            icon={<Clock className="text-orange-600" />} 
+            label="In Waiting Room" 
+            value={stats.waiting} 
+            color="orange"
+          />
+          <StatCard 
+            icon={<CheckCircle className="text-green-600" />} 
+            label="Completed Today" 
+            value={stats.completed} 
+            color="green"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* LEFT: Current & Next Patient (Operational Core) */}
+          <div className="lg:col-span-12 space-y-8">
+            
+            {/* Current Patient Section */}
+            <section>
+              <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <Activity className="text-blue-500 w-5 h-5" />
+                Active Consultation
+              </h2>
+              {queue.current ? (
+                <div className="bg-white rounded-3xl shadow-xl shadow-blue-500/5 border border-blue-100 overflow-hidden group">
+                  <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl font-bold border border-white/30">
+                        {queue.current.queueNumber}
+                      </div>
+                      <div>
+                        <p className="text-blue-100/80 text-sm font-bold uppercase tracking-widest mb-1">Current Patient</p>
+                        <h3 className="text-3xl font-bold">{queue.current.patientName}</h3>
+                        <p className="text-blue-100 text-sm mt-1">ID: {queue.current.patientId} | Slot: {queue.current.timeSlot}</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => router.push(`/doctor-dashboard/consultation/${queue.current.appointmentId}`)}
+                      className="bg-white text-blue-700 px-8 py-3 rounded-2xl font-bold shadow-lg hover:bg-blue-50 transition-all flex items-center gap-2"
+                    >
+                      <Play size={18} />
+                      Resume Consult
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-gray-200">
+                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <User className="text-gray-300" size={32} />
+                  </div>
+                  <h4 className="text-gray-800 font-bold text-xl">No active consultation</h4>
+                  <p className="text-gray-500 mt-2">Pick the next patient from your waiting list to start.</p>
+                </div>
+              )}
+            </section>
+
+            {/* Next in Line Quick Action */}
+            {queue.next && (
+              <section className="bg-white border border-emerald-100 rounded-3xl p-6 flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold border border-emerald-100">
+                    {queue.next.queueNumber}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-800">Next Patient: {queue.next.patientName}</h4>
+                    <p className="text-sm text-gray-500">Wait time: Approx 5-10 mins</p>
+                  </div>
+                </div>
+                <button 
+                   onClick={() => router.push(`/doctor-dashboard/consultation/${queue.next.appointmentId}`)}
+                   className="p-3 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20"
                 >
-                  {period.charAt(0).toUpperCase() + period.slice(1)}
+                  <ArrowRight size={20} />
                 </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Key Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Total Patients</p>
-                <p className="text-3xl font-bold text-gray-800">{totalPatients}</p>
-                <p className="text-green-600 text-sm font-medium flex items-center gap-1 mt-1">
-                  <TrendingUp size={16} />
-                  {Math.floor((totalPatients / 30) * 100)}% monthly growth
-                </p>
-              </div>
-              <Users className="text-blue-500" size={32} />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Appointments Today</p>
-                <p className="text-3xl font-bold text-gray-800">{todaysAppointments?.total || 0}</p>
-                <p className="text-blue-600 text-sm font-medium flex items-center gap-1 mt-1">
-                  <Calendar size={16} />
-                  {todaysAppointments?.remaining || 0} remaining
-                </p>
-              </div>
-              <Calendar className="text-green-500" size={32} />
-            </div>
-          </div>
-          </div>
-
-        {/* Charts Row 1 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Patient Visits Chart */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Weekly Patient Visits</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={patientVisitsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="visits" fill="#3B82F6" radius={[4, 4, 0, 0]} name="Total Visits" />
-                <Bar dataKey="consultations" fill="#10B981" radius={[4, 4, 0, 0]} name="Consultations" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Common Conditions */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Common Patient Conditions</h3>
-            {conditionsData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={conditionsData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
-                    paddingAngle={2}
-                    dataKey="value"
-                    label={({ name, percent }) => (
-                      <text 
-                        x={0} 
-                        y={0} 
-                        fill="#333" 
-                        textAnchor="middle" 
-                        fontSize={10}
-                        dominantBaseline="central"
-                      >
-                        {`${name.slice(0, 12)}${name.length > 12 ? '...' : ''}: ${(percent * 100).toFixed(0)}%`}
-                      </text>
-                    )}
-                    labelLine={false}
-                  >
-                    {conditionsData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value, name, props) => [
-                      `${value} cases`,
-                      props.payload.name
-                    ]}
-                  />
-                  <Legend 
-                    layout="vertical" 
-                    verticalAlign="middle" 
-                    align="right"
-                    wrapperStyle={{
-                      fontSize: '12px',
-                      paddingLeft: '20px'
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-500">
-                No condition data available from appointment notes
-              </div>
+              </section>
             )}
-          </div>
-        </div>
 
-        {/* Charts Row 2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Monthly Trends */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Monthly Patient & Revenue Trends</h3>
-            {monthlyTrendsData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={monthlyTrendsData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Legend />
-                  <Line 
-                    yAxisId="left"
-                    type="monotone" 
-                    dataKey="patients" 
-                    stroke="#3B82F6" 
-                    strokeWidth={3}
-                    dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
-                    name="Patients"
-                  />
-                  <Line 
-                    yAxisId="right"
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#10B981" 
-                    strokeWidth={3}
-                    dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
-                    name="Revenue (₹)"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-500">
-                No monthly trend data available
+            {/* Today's Full Agenda */}
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                  <Clock className="text-gray-500 w-5 h-5" />
+                  Today's Schedule
+                </h2>
+                <button 
+                  onClick={() => router.push('/doctor-dashboard/appointments')}
+                  className="text-sm text-blue-600 font-bold hover:underline"
+                >
+                  View All
+                </button>
               </div>
-            )}
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="divide-y divide-gray-100">
+                  {appointments.slice(0, 5).map((appt) => (
+                    <div key={appt.appointment_id} className="p-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="text-xs font-bold text-gray-400 w-12">{appt.time_slot}</div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-800">{appt.patient_name}</p>
+                          <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">{appt.status}</p>
+                        </div>
+                      </div>
+                      <ChevronRight size={16} className="text-gray-300" />
+                    </div>
+                  ))}
+                  {appointments.length === 0 && (
+                    <div className="p-8 text-center text-gray-400 text-sm">No appointments scheduled for today.</div>
+                  )}
+                </div>
+              </div>
+            </section>
           </div>
 
-          {/* Appointment Status */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Appointment Status Distribution</h3>
-            {appointmentStatusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={appointmentStatusData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    dataKey="count"
-                    label={({ name, percent }) => (
-                      <text 
-                        x={0} 
-                        y={0} 
-                        fill="#333" 
-                        textAnchor="middle" 
-                        fontSize={10}
-                        dominantBaseline="central"
-                      >
-                        {`${name}: ${(percent * 100).toFixed(0)}%`}
-                      </text>
-                    )}
-                    labelLine={false}
-                  >
-                    {appointmentStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value, name, props) => [
-                      `${value} appointments`,
-                      props.payload.status
-                    ]}
-                  />
-                  <Legend 
-                    layout="vertical" 
-                    verticalAlign="middle" 
-                    align="right"
-                    wrapperStyle={{
-                      fontSize: '12px',
-                      paddingLeft: '20px'
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-500">
-                No appointment status data available
-              </div>
-            )}
-          </div>
+
+
         </div>
       </div>
     </div>
   );
 };
 
-export default DoctorAnalyticsDashboard;
+// UI Components
+const StatCard = ({ icon, label, value, color }) => {
+  const colors = {
+    blue: 'border-blue-500 bg-blue-50/10',
+    orange: 'border-orange-500 bg-orange-50/10',
+    green: 'border-green-500 bg-green-50/10'
+  };
+
+  return (
+    <div className={`bg-white rounded-3xl p-6 border-l-4 shadow-sm ${colors[color]}`}>
+      <div className="flex items-center gap-4">
+        <div className="p-3 bg-white rounded-2xl shadow-sm border border-gray-100">{icon}</div>
+        <div>
+          <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">{label}</p>
+          <p className="text-3xl font-black text-gray-800 mt-1">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DoctorMainDashboard;

@@ -1,5 +1,5 @@
 // components/dashboard/StatsCards.jsx
-import { Users, Calendar, MessageSquare, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
+import { Users, Calendar, MessageSquare, IndianRupee, TrendingUp, TrendingDown } from 'lucide-react';
 
 const stats = [
   {
@@ -31,10 +31,10 @@ const stats = [
   },
   {
     title: 'Monthly Revenue',
-    value: '$24,567',
+    value: '₹24,567',
     change: '+18%',
     trend: 'up',
-    icon: DollarSign,
+    icon: IndianRupee,
     color: 'text-yellow-600',
     bgColor: 'bg-yellow-50'
   }

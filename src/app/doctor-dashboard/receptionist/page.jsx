@@ -1,7 +1,7 @@
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 
-           'use client'
-
-import { useState, useEffect } from 'react';
+           import { useState, useEffect } from 'react';
 import { FiSearch, FiUserPlus, FiEdit2, FiTrash2, FiChevronLeft, FiChevronRight, FiX, FiEye, FiEyeOff } from 'react-icons/fi';
 import { MdOutlineVerified, MdOutlinePending } from 'react-icons/md';
 import { User, X, Eye, EyeOff } from 'lucide-react';
@@ -38,7 +38,7 @@ const[doctorId,setID]=useState();
 
   const fetchDoctorProfile = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/v1/clinic/fetchProfileData/${id}`);
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/fetchProfileData/${id}`);
       const data = await response.json();
       if (data.success && data.data.clinic) {
         setClinicId(data.data.clinic.clinicId);
@@ -53,7 +53,7 @@ const[doctorId,setID]=useState();
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`http://localhost:3001/api/v1/clinic/fetch-receptionist/${clinicId}`);
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-receptionist/${clinicId}`);
       const data = await response.json();
       if (data.success) {
         setReceptionists(data.data.staff || []);
@@ -98,7 +98,7 @@ const[doctorId,setID]=useState();
     }
 
     try {
-      const response = await fetch(`http://localhost:3001/api/v1/clinic/delete-receptionist/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/delete-receptionist/${id}`, {
         method: 'DELETE',
       });
       const data = await response.json();
@@ -159,7 +159,7 @@ const[doctorId,setID]=useState();
       let response;
       if (currentReceptionist) {
         // Update existing receptionist
-        response = await fetch(`http://localhost:3001/api/v1/clinic/update-receptionist/${currentReceptionist._id}`, {
+        response = await fetch(`${API_BASE_URL}/api/v1/clinic/update-receptionist/${currentReceptionist._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -168,7 +168,7 @@ const[doctorId,setID]=useState();
         });
       } else {
         // Create new receptionist - note: backend uses misspelled 'add-receptinist'
-        response = await fetch('http://localhost:3001/api/v1/clinic/add-receptinist', {
+        response = await fetch(`${API_BASE_URL}/api/v1/clinic/add-receptionist`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

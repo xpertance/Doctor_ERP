@@ -1,8 +1,8 @@
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 
 
-// 'use client';
-
-// import { useEffect, useState } from 'react';
+// // import { useEffect, useState } from 'react';
 // import { useParams, useRouter } from 'next/navigation';
 // import { Star, MapPin, Clock, Award, HeartPulse, Calendar, ChevronLeft, User, MessageCircle, Phone, Mail, Globe, X } from 'lucide-react';
 // import { motion } from 'framer-motion';
@@ -49,11 +49,11 @@
 //     const fetchDoctor = async () => {
 //       try {
 //         setIsLoading(true);
-//         let res = await fetch(`http://localhost:3001/api/doctor/fetchOne/${id}`);
+//         let res = await fetch(`${API_BASE_URL}/api/doctor/fetchOne/${id}`);
         
 //         if (!res.ok) {
 //           console.log('Specific endpoint failed, trying fetchAll...');
-//           const allRes = await fetch('http://localhost:3001/api/doctor/fetchAll');
+//           const allRes = await fetch(`${API_BASE_URL}/api/doctor/fetchAll`);
           
 //           if (!allRes.ok) {
 //             throw new Error(`API request failed with status ${allRes.status}`);
@@ -111,7 +111,7 @@
 //       setSlotError(null);
       
 //       try {
-//         const response = await fetch(`http://localhost:3001/api/appointment/already-booked/${doctor._id}`);
+//         const response = await fetch(`${API_BASE_URL}/api/appointment/already-booked/${doctor._id}`);
         
 //         if (!response.ok) {
 //           throw new Error('Failed to fetch availability data');
@@ -154,7 +154,7 @@
 
 //   const checkAvailability = async (doctorId, date, time) => {
 //     try {
-//       const response = await fetch(`http://localhost:3001/api/appointment/already-booked/${doctorId}`);
+//       const response = await fetch(`${API_BASE_URL}/api/appointment/already-booked/${doctorId}`);
       
 //       if (!response.ok) {
 //         throw new Error('Failed to fetch availability data');
@@ -280,7 +280,7 @@
 //         patientId: userData.id,
 //       };
 
-//       const response = await fetch('http://localhost:3001/api/appointment/create', {
+//       const response = await fetch(`${API_BASE_URL}/api/appointment/create`, {
 //         method: 'POST',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -803,8 +803,6 @@
 //   );
 // }
 
-'use client';
-
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Star, MapPin, Clock, Award, HeartPulse, Calendar, ChevronLeft, User, MessageCircle, Phone, Mail, Globe, X, CheckCircle } from 'lucide-react';
@@ -851,7 +849,7 @@ export default function DoctorDetailsPage() {
     const fetchDoctor = async () => {
       try {
         setIsLoading(true);
-        let res = await fetch(`http://localhost:3001/api/v1/doctor/fetch-by-id/${id}`);
+        let res = await fetch(`${API_BASE_URL}/api/v1/doctor/fetch-by-id/${id}`);
         const data = await res.json();
         
         if (data.success) {
@@ -861,7 +859,7 @@ export default function DoctorDetailsPage() {
           setDoctor(data.data.doctor);
         } else {
           console.log('Specific endpoint failed or returned error, trying fetchAll...');
-          const allRes = await fetch('http://localhost:3001/api/v1/doctor/fetchAll');
+          const allRes = await fetch(`${API_BASE_URL}/api/v1/doctor/fetchAll`);
           const allData = await allRes.json();
           
           if (allData.success) {
@@ -911,7 +909,7 @@ export default function DoctorDetailsPage() {
       setSlotError(null);
       
       try {
-        const response = await fetch(`http://localhost:3001/api/v1/appointment/already-booked/${doctor._id}`);
+        const response = await fetch(`${API_BASE_URL}/api/v1/appointment/already-booked/${doctor._id}`);
         const data = await response.json();
         
         if (data.success) {
@@ -955,7 +953,7 @@ export default function DoctorDetailsPage() {
 
   const checkAvailability = async (doctorId, date, time) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/v1/appointment/already-booked/${doctorId}`);
+      const response = await fetch(`${API_BASE_URL}/api/v1/appointment/already-booked/${doctorId}`);
       const data = await response.json();
       
       if (data.success && data.data.slots[date] && data.data.slots[date].includes(time)) {
@@ -1074,7 +1072,7 @@ export default function DoctorDetailsPage() {
         patientId: userData.id,
       };
 
-      const response = await fetch('http://localhost:3001/api/v1/appointment/create', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/appointment/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

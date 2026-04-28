@@ -1,4 +1,5 @@
-'use client'
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 import { motion } from 'framer-motion'
 import { Search, Filter, MapPin, ChevronDown, Star, X, Plus, Image as ImageIcon, Clock, Phone, Mail, Globe } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -34,7 +35,7 @@ export default function ClinicsPage() {
   const fetchClinics = async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:3001/api/v1/clinic/fetch-all-clinics');
+      const res = await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-all-clinics`);
       const data = await res.json();
 
       if (data.success) {
@@ -62,7 +63,7 @@ export default function ClinicsPage() {
   //   const fetchClinics = async () => {
   //     try {
   //       setLoading(true)
-  //       const res = await fetch('http://localhost:3001/api/clinic/fetch-all-clinics')
+  //       const res = await fetch(`${API_BASE_URL}/api/clinic/fetch-all-clinics`)
         
   //       if (!res.ok) {
   //         throw new Error('Failed to fetch clinics')

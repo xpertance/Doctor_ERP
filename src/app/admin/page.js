@@ -1,4 +1,5 @@
-'use client'
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 import { Users, UserPlus, Activity, TrendingUp, Calendar, Clock, MapPin, Phone } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
@@ -14,13 +15,13 @@ export default function Dashboard() {
       try {
         setLoading(true)
         // Fetch doctors count
-        const doctorsResponse = await axios.get('http://localhost:3001/api/v1/doctor/fetchAll')
+        const doctorsResponse = await axios.get(`${API_BASE_URL}/api/v1/doctor/fetchAll`)
         if (doctorsResponse.data.success) {
           setDoctorsCount(doctorsResponse.data.data.doctors.length)
         }
         
         // Fetch clinics count and recent clinics
-        const clinicsResponse = await axios.get('http://localhost:3001/api/v1/clinic/fetch-all-clinics')
+        const clinicsResponse = await axios.get(`${API_BASE_URL}/api/v1/clinic/fetch-all-clinics`)
         if (clinicsResponse.data.success) {
           const clinics = clinicsResponse.data.data.clinics || [];
           setClinicsCount(clinics.length)

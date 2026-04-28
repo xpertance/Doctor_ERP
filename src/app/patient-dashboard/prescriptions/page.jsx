@@ -1,5 +1,5 @@
-"use client"
-
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 import { FaPills, FaClinicMedical, FaRegCalendarAlt, FaRegClock } from 'react-icons/fa';
 
 import { FiDownload, FiPrinter, FiPlus, FiEye, FiX, FiFilter, FiSearch, FiUser, FiPhone } from 'react-icons/fi';
@@ -153,7 +153,7 @@ export default function PrescriptionsPage() {
   const fetchPrescriptions = async () => {
     try {
 
-      const res = await fetch(`http://localhost:3001/api/v1/appointment/fetch-checkin-by-id/${userID}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/appointment/fetch-checkin-by-id/${userID}`);
       const data = await res.json();
       console.log("prescription data", data);
       setData(data.data)

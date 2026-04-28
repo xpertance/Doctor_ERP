@@ -1,5 +1,6 @@
-// 'use client'
-// import { useEffect, useState, useMemo } from 'react';
+'use client';
+import { API_BASE_URL } from '@/utils/api';
+// // import { useEffect, useState, useMemo } from 'react';
 // import axios from 'axios';
 // import { 
 //   Search, 
@@ -40,7 +41,7 @@
 //   const fetchDoctors = async () => {
 //     try {
 //       setLoading(true);
-//       const response = await axios.get('http://localhost:3001/api/doctor/fetchAll');
+//       const response = await axios.get(`${API_BASE_URL}/api/doctor/fetchAll`);
 //       setDoctors(response.data.doctors);
 //     } catch (err) {
 //       console.error("Error fetching doctors:", err);
@@ -60,7 +61,7 @@
 //   const handleDeleteDoctor = async (doctor) => {
 //     setIsDeleting(true);
 //     try {
-//       await axios.delete(`http://localhost:3001/api/doctor/delete-by-id/${doctor._id}`);
+//       await axios.delete(`${API_BASE_URL}/api/doctor/delete-by-id/${doctor._id}`);
 //       setDoctors(prev => prev.filter(d => d._id !== doctor._id));
 //       setDeleteModal({ isOpen: false, doctor: null });
 //     } catch (error) {
@@ -77,7 +78,7 @@
 
 //     try {
 //       const response = await axios.put(
-//         `http://localhost:3001/api/doctor/update-by-id/${doctorId}`,
+//         `${API_BASE_URL}/api/doctor/update-by-id/${doctorId}`,
 //         formattedData,
 //         {
 //           headers: {
@@ -876,7 +877,6 @@
 //   );
 // }
 
-'use client'
 import { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { 
@@ -916,7 +916,7 @@ export default function DoctorsPage() {
   const fetchDoctors = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3001/api/v1/doctor/fetchAll');
+      const response = await axios.get(`${API_BASE_URL}/api/v1/doctor/fetchAll`);
       if (response.data.success) {
         setDoctors(response.data.data.doctors);
       }
@@ -975,7 +975,7 @@ export default function DoctorsPage() {
   const handleDeleteDoctor = async (doctor) => {
     setIsDeleting(true);
     try {
-      const response = await axios.delete(`http://localhost:3001/api/v1/doctor/delete-by-id/${doctor._id}`);
+      const response = await axios.delete(`${API_BASE_URL}/api/v1/doctor/delete-by-id/${doctor._id}`);
       if (response.data.success) {
         setDoctors(prev => prev.filter(d => d._id !== doctor._id));
         setShowRejectModal(false);
@@ -991,7 +991,7 @@ export default function DoctorsPage() {
   const handleApproveDoctor = async (id) => {
     try {
       setLoading(true);
-      const response = await axios.put(`http://localhost:3001/api/v1/doctor/update-by-id/${id}`, {
+      const response = await axios.put(`${API_BASE_URL}/api/v1/doctor/update-by-id/${id}`, {
         isVerified: true,
         status: 'active'
       });
@@ -1016,7 +1016,7 @@ export default function DoctorsPage() {
     }
     try {
       setLoading(true);
-      const response = await axios.put(`http://localhost:3001/api/v1/doctor/update-by-id/${selectedDoctor._id}`, {
+      const response = await axios.put(`${API_BASE_URL}/api/v1/doctor/update-by-id/${selectedDoctor._id}`, {
         status: 'rejected',
         isVerified: false,
         rejectionReason: rejectionReason.description
@@ -1048,7 +1048,7 @@ export default function DoctorsPage() {
 
     try {
       const response = await axios.put(
-        `http://localhost:3001/api/v1/doctor/update-by-id/${doctorId}`,
+        `${API_BASE_URL}/api/v1/doctor/update-by-id/${doctorId}`,
         formattedData,
         {
           headers: {

@@ -1,5 +1,6 @@
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 
-'use client'
 import { useState, useEffect } from 'react'
 import { Pencil, Trash2, Plus, Search, ChevronDown, ChevronUp, Filter, X, Eye, Check, XCircle, Building2, Clock, CheckCircle } from 'lucide-react'
 
@@ -40,7 +41,7 @@ export default function ClinicsManage() {
     const fetchClinics = async () => {
       try {
         setLoading(true)
-        const res = await fetch('http://localhost:3001/api/v1/clinic/fetch-all-clinics')
+        const res = await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-all-clinics`)
 
         if (!res.ok) {
           throw new Error('Failed to fetch clinics')
@@ -166,7 +167,7 @@ export default function ClinicsManage() {
   const handleApproveClinic = async (id) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3001/api/v1/clinic/update-status/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/update-status/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -203,7 +204,7 @@ export default function ClinicsManage() {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3001/api/v1/clinic/update-status/${selectedClinic._id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/update-status/${selectedClinic._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

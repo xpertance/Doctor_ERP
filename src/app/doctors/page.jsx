@@ -1,5 +1,5 @@
 'use client';
-
+import { API_BASE_URL } from '@/utils/api';
 import { useEffect, useState } from 'react';
 import { Search, Filter, MapPin, ChevronDown, Star, Calendar, Clock, Award, HeartPulse } from 'lucide-react';
 import Link from 'next/link';
@@ -40,7 +40,7 @@ export default function FindDoctorsPage() {
   const fetchDoctors = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("http://localhost:3001/api/v1/doctor/fetchAll");
+      const res = await fetch("${API_BASE_URL}/api/v1/doctor/fetchAll");
       const data = await res.json();
       
       if (data.success) {

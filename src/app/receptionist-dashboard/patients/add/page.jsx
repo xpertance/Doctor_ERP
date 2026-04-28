@@ -1,23 +1,28 @@
-// app/dashboard/patients/add/page.js
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, User, Phone, Mail, Calendar, MapPin, FileText, Droplet, Lock } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { patientService } from '@/utils/patientService';
+import { appointmentService } from '@/utils/appointmentService';
+import { doctorService } from '@/utils/doctorService';
 
 export default function AddPatientPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const { token } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    age: '',
     dateOfBirth: '',
     gender: '',
-    bloodGroup: '', // Added blood group field
-    phone: '',
+    bloodGroup: '',
+    phoneNumber: '',
     email: '',
-    password: '', // Added password field
+    password: '',
     address: '',
     city: '',
     state: '',
@@ -25,14 +30,37 @@ export default function AddPatientPage() {
     medicalHistory: '',
     allergies: '',
     currentMedications: '',
-    symptoms: ''
+    symptoms: '',
+    // Appointment fields
+    doctorId: '',
+    appointmentDate: '',
+    timeSlot: '',
   });
+
+  const [doctors, setDoctors] = useState([]);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        if (token) {
+          const res = await doctorService.getDoctors(token);
+          if (res.success) setDoctors(res.data.doctors);
+        }
+      } catch (err) {
+        console.error('Error fetching doctors:', err);
+      }
+    };
+    fetchDoctors();
+  }, [token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
+      ...(name === 'age' && {
+        dateOfBirth: value ? `${new Date().getFullYear() - parseInt(value)}-01-01` : ''
+      })
     }));
   };
 
@@ -42,25 +70,27 @@ export default function AddPatientPage() {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/v1/patient/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create patient');
-      }
-
-      const result = await response.json();
-      console.log('Patient created successfully:', result);
+      if (!token) throw new Error('You must be logged in to add a patient');
       
-      // Redirect to patients list with success message
-      alert("Patient added Successfully");
-      router.push('/dashboard/patients');
+      const result = await patientService.registerPatient(formData, token);
+      
+      // If registration is successful, book the mandatory appointment
+      if (result.success && result.data.patient._id) {
+        const appointmentData = {
+          patientId: result.data.patient._id,
+          doctorId: formData.doctorId,
+          appointmentDate: formData.appointmentDate,
+          timeSlot: formData.timeSlot,
+          reason: formData.symptoms || 'Initial Consultation'
+        };
+        
+        await appointmentService.createAppointment(appointmentData, token);
+        alert("Patient registered and appointment booked successfully!");
+      } else {
+        alert("Patient added Successfully");
+      }
+      
+      router.push('/receptionist-dashboard/patients');
     } catch (error) {
       console.error('Error adding patient:', error);
       setError(error.message || 'An error occurred while creating the patient');
@@ -71,22 +101,7 @@ export default function AddPatientPage() {
 
   return (
     <div className="space-y-8 p-6 bg-blue-50 min-h-screen">
-      {/* Page Header */}
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center space-x-4 p-6 bg-white rounded-xl shadow-sm border border-blue-100">
-          <Link 
-            href="/dashboard/patients" 
-            className="p-2 rounded-lg hover:bg-blue-50 transition-colors duration-200"
-          >
-            <ArrowLeft className="w-5 h-5 text-blue-600" />
-          </Link>
-          <div className="h-8 border-l border-blue-200" />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Add New Patient</h1>
-            <p className="text-gray-500 mt-1">Enter patient details to create a new medical record</p>
-          </div>
-        </div>
-
         {/* Error Message */}
         {error && (
           <div className="mt-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg p-4 animate-fade-in">
@@ -149,16 +164,19 @@ export default function AddPatientPage() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date of Birth <span className="text-red-500">*</span>
+                    Age <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
-                      type="date"
-                      name="dateOfBirth"
-                      value={formData.dateOfBirth}
+                      type="number"
+                      name="age"
+                      value={formData.age}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 appearance-none bg-blue-50/50"
+                      min="0"
+                      max="150"
+                      className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                      placeholder="Enter age"
                     />
                     <Calendar className="absolute right-3 top-3 h-5 w-5 text-blue-400 pointer-events-none" />
                   </div>
@@ -212,141 +230,142 @@ export default function AddPatientPage() {
             </div>
           </div>
 
-      {/* Contact Information */}
-<div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden transition-all duration-200 hover:shadow-md">
-  <div className="px-6 py-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-blue-100">
-    <div className="flex items-center">
-      <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
-        <Phone className="w-5 h-5" />
-      </div>
-      <h3 className="ml-3 text-lg font-semibold text-gray-800">Contact Information</h3>
-    </div>
-  </div>
-  
-  <div className="p-6">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Phone Number <span className="text-red-500">*</span>
-        </label>
-        <div className="relative">
-          <input
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2.5 pl-12 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
-            placeholder="(555) 123-4567"
-          />
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Phone className="h-5 w-5 text-blue-400" />
+          {/* Contact Information */}
+          <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden transition-all duration-200 hover:shadow-md">
+            <div className="px-6 py-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-blue-100">
+              <div className="flex items-center">
+                <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <h3 className="ml-3 text-lg font-semibold text-gray-800">Contact Information</h3>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-2.5 pl-12 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                      placeholder="(555) 123-4567"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Phone className="h-5 w-5 text-blue-400" />
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-2.5 pl-12 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                      placeholder="patient@example.com"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-blue-400" />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2.5 pl-12 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                      placeholder="Street address"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <MapPin className="h-5 w-5 text-blue-400" />
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                    placeholder="City"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    State
+                  </label>
+                  <input
+                    type="text"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                    placeholder="State"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Zip Code
+                  </label>
+                  <input
+                    type="text"
+                    name="zipCode"
+                    value={formData.zipCode}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                    placeholder="12345"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Password <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-2.5 pl-12 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                      placeholder="Create a password"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-blue-400" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Email Address
-        </label>
-        <div className="relative">
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full px-4 py-2.5 pl-12 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
-            placeholder="patient@example.com"
-          />
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Mail className="h-5 w-5 text-blue-400" />
-          </div>
-        </div>
-      </div>
-      
-      <div className="md:col-span-2">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Address
-        </label>
-        <div className="relative">
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            className="w-full px-4 py-2.5 pl-12 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
-            placeholder="Street address"
-          />
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <MapPin className="h-5 w-5 text-blue-400" />
-          </div>
-        </div>
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          City
-        </label>
-        <input
-          type="text"
-          name="city"
-          value={formData.city}
-          onChange={handleChange}
-          className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
-          placeholder="City"
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          State
-        </label>
-        <input
-          type="text"
-          name="state"
-          value={formData.state}
-          onChange={handleChange}
-          className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
-          placeholder="State"
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Zip Code
-        </label>
-        <input
-          type="text"
-          name="zipCode"
-          value={formData.zipCode}
-          onChange={handleChange}
-          className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
-          placeholder="12345"
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Password <span className="text-red-500">*</span>
-        </label>
-        <div className="relative">
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2.5 pl-12 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
-            placeholder="Create a password"
-          />
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Lock className="h-5 w-5 text-blue-400" />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
           
 
           {/* Medical Information */}
@@ -421,11 +440,86 @@ export default function AddPatientPage() {
               </div>
             </div>
           </div>
-
-          {/* Form Actions */}
+          {/* Book Appointment (Mandatory) */}
+          <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden transition-all duration-200 hover:shadow-md mb-6">
+            <div className="px-6 py-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-blue-100">
+              <div className="flex items-center">
+                <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <h3 className="ml-3 text-lg font-semibold text-gray-800">Book Appointment <span className="text-red-500">*</span></h3>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Doctor <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="doctorId"
+                    value={formData.doctorId}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50/50"
+                  >
+                    <option value="">Select a doctor</option>
+                    {doctors.map(doc => (
+                      <option key={doc._id} value={doc._id}>
+                        Dr. {doc.firstName} {doc.lastName} - {doc.specialty}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Appointment Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="appointmentDate"
+                    value={formData.appointmentDate}
+                    onChange={handleChange}
+                    required
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50/50"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Time Slot <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="timeSlot"
+                    value={formData.timeSlot}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50/50"
+                  >
+                    <option value="">Select time slot</option>
+                    <option value="09:00 AM - 09:30 AM">09:00 AM - 09:30 AM</option>
+                    <option value="09:30 AM - 10:00 AM">09:30 AM - 10:00 AM</option>
+                    <option value="10:00 AM - 10:30 AM">10:00 AM - 10:30 AM</option>
+                    <option value="10:30 AM - 11:00 AM">10:30 AM - 11:00 AM</option>
+                    <option value="11:00 AM - 11:30 AM">11:00 AM - 11:30 AM</option>
+                    <option value="11:30 AM - 12:00 PM">11:30 AM - 12:00 PM</option>
+                    <option value="02:00 PM - 02:30 PM">02:00 PM - 02:30 PM</option>
+                    <option value="02:30 PM - 03:00 PM">02:30 PM - 03:00 PM</option>
+                    <option value="03:00 PM - 03:30 PM">03:00 PM - 03:30 PM</option>
+                    <option value="03:30 PM - 04:00 PM">03:30 PM - 04:00 PM</option>
+                    <option value="04:00 PM - 04:30 PM">04:00 PM - 04:30 PM</option>
+                    <option value="04:30 PM - 05:00 PM">04:30 PM - 05:00 PM</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
           <div className="flex justify-end space-x-4 pt-6 pb-12">
             <Link
-              href="/dashboard/patients"
+              href="/receptionist-dashboard/patients"
               className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 font-medium"
             >
               Cancel

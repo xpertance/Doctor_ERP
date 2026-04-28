@@ -1,11 +1,11 @@
 'use client';
-
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock } from 'lucide-react';
 import { FiUser, FiMail, FiPhone, FiLock, FiCalendar } from 'react-icons/fi';
 import { FaHeartbeat, FaUserInjured, FaClinicMedical, FaStethoscope } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/utils/api';
 
 const specialties = [
   'Cardiology', 'Neurology', 'Pediatrics', 'Orthopedics',
@@ -90,7 +90,7 @@ export default function RegistrationPortal() {
 
   const checkEmailAvailability = async (email) => {
     try {
-      const response = await fetch('http://localhost:3001/api/v1/auth/check-email', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/check-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -276,12 +276,18 @@ export default function RegistrationPortal() {
     if (currentPatientStep === 3) {
       setIsPatientLoading(true);
       try {
-        const response = await fetch('http://localhost:3001/api/v1/patient/register', {
+        const response = await fetch(`${API_BASE_URL}/api/v1/patient/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(patientFormData)
+          body: JSON.stringify({
+            ...patientFormData,
+            phoneNumber: patientFormData.phone,
+            dateOfBirth: patientFormData.dob,
+            bloodGroup: patientFormData.bloodType
+          })
+
         });
 
         const responseData = await response.json();
@@ -621,7 +627,7 @@ const handleDoctorInputChange = (field, value) => {
     };
 
     try {
-      const response = await fetch('http://localhost:3001/api/v1/doctor/register', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/doctor/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -755,7 +761,7 @@ const handleDoctorInputChange = (field, value) => {
   // console.log("data",cleanedData);
   //     try {
 
-  //       const response = await fetch('http://localhost:3001/api/doctor/register', {
+  //       const response = await fetch(`${API_BASE_URL}/api/doctor/register`, {
   //         method: 'POST',
   //         headers: {
   //           'Content-Type': 'application/json',
@@ -873,20 +879,15 @@ const handleDoctorInputChange = (field, value) => {
 
     if (step === 0) {
       if (!clinicFormData.clinicName.trim()) newErrors.clinicName = 'Clinic name is required';
-      if (!clinicFormData.clinicType) newErrors.clinicType = 'Clinic type is required';
     }
     else if (step === 1) {
-      if (!clinicFormData.address.trim()) newErrors.address = 'Address is required';
-      if (!clinicFormData.city.trim()) newErrors.city = 'City is required';
-      if (!clinicFormData.country.trim()) newErrors.country = 'Country is required';
-      if (!clinicFormData.phone.trim()) newErrors.phone = 'Phone is required';
       if (!clinicFormData.email.trim()) newErrors.email = 'Email is required';
       else if (!/^\S+@\S+\.\S+$/.test(clinicFormData.email)) newErrors.email = 'Invalid email format';
       if (!clinicFormData.password) newErrors.password = 'Password is required';
       else if (clinicFormData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
     }
     else if (step === 2) {
-      if (!clinicFormData.licenseDocumentUrl) newErrors.licenseDocument = 'License document is required';
+      // Step 2 (Business Information) is now completely optional
     }
 
     setClinicErrors(newErrors);
@@ -1013,7 +1014,7 @@ const handleDoctorInputChange = (field, value) => {
 
     // Here you would typically make your API call
     try {
-      const response = await fetch('http://localhost:3001/api/v1/clinic/register', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1092,7 +1093,7 @@ const handleDoctorInputChange = (field, value) => {
   //   }
 
   //   // try {
-  //   //   const response = await fetch('http://localhost:3001/api/clinic/register', {
+  //   //   const response = await fetch(`${API_BASE_URL}/api/clinic/register`, {
   //   //     method: 'POST',
   //   //     headers: {
   //   //       'Content-Type': 'application/json',
@@ -1306,7 +1307,7 @@ const handleDoctorInputChange = (field, value) => {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Address <span className="text-red-500">*</span>
+                  Address
                 </label>
                 <input
                   type="text"
@@ -1324,7 +1325,7 @@ const handleDoctorInputChange = (field, value) => {
 
               <div>
                 <label htmlFor="city" className="block text-sm font-semibold text-gray-700 mb-2">
-                  City <span className="text-red-500">*</span>
+                  City
                 </label>
                 <input
                   type="text"
@@ -1372,7 +1373,7 @@ const handleDoctorInputChange = (field, value) => {
 
               <div>
                 <label htmlFor="country" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Country <span className="text-red-500">*</span>
+                  Country
                 </label>
                 <input
                   type="text"
@@ -1390,7 +1391,7 @@ const handleDoctorInputChange = (field, value) => {
 
               <div>
                 <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phone Number <span className="text-red-500">*</span>
+                  Phone Number
                 </label>
                 <input
                   type="tel"
@@ -1556,7 +1557,7 @@ const handleDoctorInputChange = (field, value) => {
               <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 transition-all duration-300 hover:border-orange-400">
                 <div className="text-center">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Clinic License Document*
+                    Clinic License Document
                   </label>
                   <p className="text-xs text-gray-500 mb-4">
                     Upload your clinic's license certificate (PDF, JPG, PNG)

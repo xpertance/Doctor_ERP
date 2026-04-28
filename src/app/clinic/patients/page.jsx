@@ -1,5 +1,5 @@
 'use client';
-
+import { API_BASE_URL } from '@/utils/api';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   Search, Eye, Edit, Trash2, X, User, Mail, Phone, Calendar, VenetianMask, 
@@ -124,7 +124,7 @@ const [clinicId,setId]=useState();
   useEffect(()=>{
     const fetchPatients=async()=>{
       try {
-        const res= await fetch(`http://localhost:3001/api/v1/clinic/fetch-patients/${clinicId}`);
+        const res= await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-patients/${clinicId}`);
         const responseData = await res.json();
         console.log("sdf", responseData);
         

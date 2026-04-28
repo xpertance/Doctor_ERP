@@ -1,5 +1,5 @@
-'use client'
-
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 import { useState } from 'react';
 import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowRight, FiShield } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
@@ -24,7 +24,7 @@ const ReceptionistLogin = () => {
 
     try {
       // Simulate API call
-      const response = await fetch('http://localhost:3001/api/v1/auth/receptionist-login', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/receptionist-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

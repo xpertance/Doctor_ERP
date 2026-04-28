@@ -1,5 +1,5 @@
-"use client"
-
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 import { FiCalendar, FiClock, FiAlertCircle, FiUser, FiPhone, FiMail } from 'react-icons/fi'
 import { FaHeartbeat, FaClinicMedical } from 'react-icons/fa'
 import Card from '@/components/Card'
@@ -40,7 +40,7 @@ export default function DynamicDashboard() {
     if (!userId) return;
     
     try {
-      const res = await fetch(`http://localhost:3001/api/v1/patient/fetch-by-id/${userId}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/patient/fetch-by-id/${userId}`);
       const data = await res.json();
       
       if (data.patient) {
@@ -55,7 +55,7 @@ export default function DynamicDashboard() {
     if (!userId) return;
     
     try {
-      const res = await fetch(`http://localhost:3001/api/v1/appointment/patient/${userId}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/appointment/patient/${userId}`);
       const data = await res.json();
       
       if (data.success) {
