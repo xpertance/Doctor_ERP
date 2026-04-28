@@ -1,5 +1,5 @@
 'use client';
-
+import { API_BASE_URL } from '@/utils/api';
 import { useEffect, useState } from 'react';
 import { Search, Filter, MapPin, ChevronDown, Star, Calendar, Clock, Award, HeartPulse } from 'lucide-react';
 import Link from 'next/link';
@@ -40,14 +40,21 @@ export default function FindDoctorsPage() {
   const fetchDoctors = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("https://practo-backend.vercel.app/api/doctor/fetchAll");
+      const res = await fetch("${API_BASE_URL}/api/v1/doctor/fetchAll");
       const data = await res.json();
-      const activeDoctors = data.doctors.filter((doctor) => doctor.status === 'active');
-    
-    setDoctors(activeDoctors);
-    setFilteredDoctors(activeDoctors);
+      
+      if (data.success) {
+        const doctorsList = data.data.doctors || [];
+        const activeDoctors = doctorsList.filter((doctor) => doctor.status === 'active');
+        setDoctors(activeDoctors);
+        setFilteredDoctors(activeDoctors);
+      } else {
+        console.error("Failed to fetch doctors:", data.message);
+        setDoctors([]);
+        setFilteredDoctors([]);
+      }
     } catch (err) {
-      console.log("Internal Server Error", err);
+      console.error("Internal Server Error", err);
     } finally {
       setIsLoading(false);
     }

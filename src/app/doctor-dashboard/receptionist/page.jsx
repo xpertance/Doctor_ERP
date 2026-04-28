@@ -1,7 +1,7 @@
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 
-           'use client'
-
-import { useState, useEffect } from 'react';
+           import { useState, useEffect } from 'react';
 import { FiSearch, FiUserPlus, FiEdit2, FiTrash2, FiChevronLeft, FiChevronRight, FiX, FiEye, FiEyeOff } from 'react-icons/fi';
 import { MdOutlineVerified, MdOutlinePending } from 'react-icons/md';
 import { User, X, Eye, EyeOff } from 'lucide-react';
@@ -18,28 +18,51 @@ const ReceptionistManagement = () => {
   const [error, setError] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
 const[doctorId,setID]=useState();
+  const [clinicId, setClinicId] = useState(null);
+
   // Fetch receptionists on component mount
   useEffect(() => {
-    fetchReceptionists();
-  }, []);
-useEffect(() => {
     const savedUser = localStorage.getItem('user');
-  const docData=JSON.parse(savedUser);
-    console.log("docotr user",docData);
-    setID(docData.id);
-   
-    
+    if (savedUser) {
+      const docData = JSON.parse(savedUser);
+      setID(docData.id);
+      fetchDoctorProfile(docData.id);
+    }
   }, []);
+
+  useEffect(() => {
+    if (clinicId) {
+      fetchReceptionists();
+    }
+  }, [clinicId]);
+
+  const fetchDoctorProfile = async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/fetchProfileData/${id}`);
+      const data = await response.json();
+      if (data.success && data.data.clinic) {
+        setClinicId(data.data.clinic.clinicId);
+      }
+    } catch (err) {
+      console.error('Error fetching doctor profile:', err);
+    }
+  };
+
   const fetchReceptionists = async () => {
+    if (!clinicId) return;
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('https://practo-backend.vercel.app/api/reciptionist/fetchAll'); // Adjust the endpoint as needed
-      if (!response.ok) {
-        throw new Error('Failed to fetch receptionists');
-      }
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-receptionist/${clinicId}`);
       const data = await response.json();
-      setReceptionists(data.data);
+      if (data.success) {
+        setReceptionists(data.data.staff || []);
+      } else {
+        setReceptionists([]);
+        if (data.error?.code !== 'NOT_FOUND') {
+           setError(data.message || 'Failed to fetch receptionists');
+        }
+      }
     } catch (err) {
       setError('Failed to load receptionists');
       console.error('Error fetching receptionists:', err);
@@ -48,7 +71,7 @@ useEffect(() => {
     }
   };
 
-  const filteredReceptionists = receptionists.filter(receptionist => {
+  const filteredReceptionists = (receptionists || []).filter(receptionist => {
     const matchesSearch = `${receptionist.firstName} ${receptionist.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          receptionist.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = activeFilter === 'all' || receptionist.status === activeFilter;
@@ -75,12 +98,13 @@ useEffect(() => {
     }
 
     try {
-      const response = await fetch(`/api/staff/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/delete-receptionist/${id}`, {
         method: 'DELETE',
       });
+      const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error('Failed to delete receptionist');
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to delete receptionist');
       }
 
       // Remove from local state
@@ -94,19 +118,22 @@ useEffect(() => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!clinicId) {
+      alert('Clinic ID not found. Please try again later.');
+      return;
+    }
     setSubmitLoading(true);
     setError('');
 
     const formData = new FormData(e.target);
-    const data = {
+    const apiData = {
       firstName: formData.get('firstName'),
       lastName: formData.get('lastName'),
       email: formData.get('email'),
       phone: formData.get('phone'),
       status: formData.get('status'),
-      doctorId:doctorId,
-      // Add doctorId if needed - you might want to get this from context or props
-      // doctorId: formData.get('doctorId'), 
+      doctorId: doctorId,
+      clinicId: clinicId,
     };
 
     // Handle password for new receptionists
@@ -119,12 +146,12 @@ useEffect(() => {
         setSubmitLoading(false);
         return;
       }
-      data.password = password;
+      apiData.password = password;
     } else {
       // Handle password change for existing receptionists
       const newPassword = formData.get('newPassword');
       if (newPassword && newPassword.length > 0) {
-        data.password = newPassword;
+        apiData.password = newPassword;
       }
     }
 
@@ -132,31 +159,31 @@ useEffect(() => {
       let response;
       if (currentReceptionist) {
         // Update existing receptionist
-        response = await fetch(`https://practo-backend.vercel.app/api/reciptionist/update-by-id/${currentReceptionist._id}`, {
+        response = await fetch(`${API_BASE_URL}/api/v1/clinic/update-receptionist/${currentReceptionist._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(apiData),
         });
       } else {
-        
-        // Create new receptionist
-        response = await fetch('https://practo-backend.vercel.app/api/reciptionist/create', {
+        // Create new receptionist - note: backend uses misspelled 'add-receptinist'
+        response = await fetch(`${API_BASE_URL}/api/v1/clinic/add-receptionist`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(apiData),
         });
       }
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save receptionist');
+      const resData = await response.json();
+
+      if (!resData.success) {
+        throw new Error(resData.message || 'Failed to save receptionist');
       }
 
-      const savedReceptionist = await response.json();
+      const savedReceptionist = resData.data.staff;
 
       if (currentReceptionist) {
         // Update in local state

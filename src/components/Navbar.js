@@ -1,7 +1,6 @@
+'use client';
 
-// 'use client';
-
-// import Image from 'next/image';
+// // import Image from 'next/image';
 // import Link from 'next/link';
 // import { useState,useEffect } from 'react';
 // import { Menu, X, Search, User, Bell } from 'lucide-react';
@@ -218,8 +217,6 @@
 //   );
 // }
 
-
-'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';

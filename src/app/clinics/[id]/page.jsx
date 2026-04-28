@@ -1,5 +1,6 @@
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 
-'use client'
 import { motion } from 'framer-motion'
 import { MapPin, Star, Clock, Phone, Mail, Globe, ChevronLeft, HeartPulse, Stethoscope, Pill, User, Award, Calendar, X, ChevronRight, Map } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -30,18 +31,11 @@ export default function ClinicDetailsPage() {
 
       console.log('Fetching clinic with ID:', params.id)
       
-      const res = await fetch(`https://practo-backend.vercel.app/api/clinic/fetch-by-id/${params.id}`)
-      
-      if (!res.ok) {
-        throw new Error(`Failed to fetch clinic data: ${res.status}`)
-      }
-
+      const res = await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-by-id/${params.id}`)
       const data = await res.json()
-      console.log('API Response:', data)
       
-      if (data) {
-        console.log('Clinic Data:', data)
-        setClinicData(data)
+      if (data.success && data.data.clinic) {
+        setClinicData(data.data.clinic)
       } else {
         throw new Error(data.message || 'Failed to fetch clinic data')
       }
@@ -62,15 +56,14 @@ export default function ClinicDetailsPage() {
 
       console.log('Fetching doctors for clinic ID:', params.id)
       
-      const res = await fetch(`https://practo-backend.vercel.app/api/clinic/fetch-doctor-clinicId/${params.id}`)
-      
-      if (!res.ok) {
-        throw new Error(`Failed to fetch doctors data: ${res.status}`)
-      }
-
+      const res = await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-doctor-clinicId/${params.id}`)
       const data = await res.json()
-      console.log('Doctors API Response:', data.doctor)
-      setDoctorsData(data.doctor)
+
+      if (data.success) {
+        setDoctorsData(data.data.doctors || [])
+      } else {
+        setDoctorsData([])
+      }
     } catch (err) {
       console.error('Error fetching doctors:', err)
       setDoctorsData([])

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -18,7 +19,16 @@ import {
   Pill,
   Download as DownloadIcon,
   X,
+  Calendar,
+  Clock,
+  Stethoscope,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { patientService } from '@/utils/patientService';
+import { appointmentService } from '@/utils/appointmentService';
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState([]);
@@ -32,16 +42,32 @@ export default function PatientsPage() {
   const [itemsPerPage] = useState(10);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [pagination, setPagination] = useState({ totalPages: 1, totalCount: 0 });
+  const [appointmentHistory, setAppointmentHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+   const { token } = useAuth();
+   const searchParams = useSearchParams();
+   const querySearch = searchParams.get('search') || '';
+
+   useEffect(() => {
+     setSearchTerm(querySearch);
+   }, [querySearch]);
 
   useEffect(() => {
     const fetchPatients = async () => {
+      if (!token) return;
+      setLoading(true);
       try {
-        const response = await fetch('https://practo-backend.vercel.app/api/patients/fetchAll');
-        if (!response.ok) {
-          throw new Error('Failed to fetch patients');
-        }
-        const data = await response.json();
-        setPatients(data.data || []);
+        const result = await patientService.getPatients({
+          page: currentPage,
+          limit: itemsPerPage,
+          name: searchTerm,
+          // gender filter is not currently supported by backend search, but we can add it later if needed
+          // or just filter locally if the pagination is small, but better to fetch
+        }, token);
+        
+        setPatients(result.data.patients || []);
+        setPagination(result.data.pagination);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -49,20 +75,22 @@ export default function PatientsPage() {
       }
     };
 
-    fetchPatients();
-  }, []);
+    const debounceTimer = setTimeout(fetchPatients, 500);
+    return () => clearTimeout(debounceTimer);
+  }, [token, currentPage, searchTerm]);
 
   // Transform patient data for display
   const transformPatientData = (patient) => {
     return {
       id: patient._id,
+      patientCode: patient.patientCode,
       name: `${patient.firstName} ${patient.lastName}`,
       age: calculateAge(patient.dateOfBirth),
       gender: patient.gender,
-      phone: patient.phone,
+      phone: patient.phoneNumber,
       email: patient.email,
-      lastVisit: patient.updatedAt,
-      doctor: 'Dr. Smith',
+      lastVisit: patient.lastVisit,
+      doctor: patient.doctor,
       registrationDate: patient.createdAt,
       bloodGroup: patient.bloodGroup,
       medicalHistory: patient.medicalHistory,
@@ -78,17 +106,14 @@ export default function PatientsPage() {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   }
 
-  // Filter and sort patients
+  // Transform and Filter data
+  // Note: Most filtering is now server-side, but gender and client-side sorting are still here for convenience
   const filteredPatients = patients
     .map(transformPatientData)
     .filter((patient) => {
-      const matchesSearch =
-        patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        patient.phone.includes(searchTerm) ||
-        patient.email.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesGender = !filterGender || patient.gender === filterGender;
-
-      return matchesSearch && matchesGender;
+      const hasConsultation = patient.lastVisit && patient.lastVisit !== 'No visits yet';
+      return matchesGender && hasConsultation;
     })
     .sort((a, b) => {
       const aValue = a[sortBy];
@@ -101,40 +126,61 @@ export default function PatientsPage() {
       }
     });
 
-  // Pagination
-  const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedPatients = filteredPatients.slice(startIndex, startIndex + itemsPerPage);
+  // Pagination is handled by server-side query, but we show the ones from filtered list
+  const totalPages = pagination.totalPages;
+  const paginatedPatients = filteredPatients; // Server already limited the count
 
   const handleDelete = async (patientId) => {
     if (window.confirm('Are you sure you want to delete this patient?')) {
       try {
-        const response = await fetch(
-          `https://practo-backend.vercel.app/api/patients/delete/${patientId}`,
-          {
-            method: 'DELETE',
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to delete patient');
-        }
-
+        await patientService.deletePatient(patientId, token);
         setPatients(patients.filter((p) => p._id !== patientId));
+        alert('Patient deleted successfully');
       } catch (err) {
         alert(`Error deleting patient: ${err.message}`);
       }
     }
   };
 
-  const openPatientModal = (patient) => {
-    setSelectedPatient(patient);
-    setShowModal(true);
+  const openPatientModal = async (patient) => {
+    try {
+      const result = await patientService.getPatientById(patient.id, token);
+      setSelectedPatient(transformPatientData(result.data.patient));
+      setShowModal(true);
+
+      // Fetch appointment history in parallel
+      setLoadingHistory(true);
+      try {
+        const historyRes = await appointmentService.getPatientHistory(patient.id, token);
+        if (historyRes.success) {
+          setAppointmentHistory(historyRes.data.appointments || []);
+        }
+      } catch (histErr) {
+        console.error('Error fetching appointment history:', histErr);
+        setAppointmentHistory([]);
+      } finally {
+        setLoadingHistory(false);
+      }
+    } catch (err) {
+      alert(`Error fetching patient details: ${err.message}`);
+    }
   };
 
   const closeModal = () => {
     setShowModal(false);
     setSelectedPatient(null);
+    setAppointmentHistory([]);
+  };
+
+  const getHistoryStatusStyle = (status) => {
+    switch (status) {
+      case 'completed': return { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', icon: <CheckCircle className="w-4 h-4" /> };
+      case 'cancelled': return { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', icon: <XCircle className="w-4 h-4" /> };
+      case 'booked': return { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', icon: <Clock className="w-4 h-4" /> };
+      case 'checked_in': return { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', icon: <AlertCircle className="w-4 h-4" /> };
+      case 'in_progress': return { bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200', icon: <Stethoscope className="w-4 h-4" /> };
+      default: return { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200', icon: <Clock className="w-4 h-4" /> };
+    }
   };
 
   const handleDownloadPDF = () => {
@@ -177,80 +223,82 @@ export default function PatientsPage() {
 
   return (
     <div className="space-y-6 relative font-sans">
-      {/* Page Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Patient Management</h1>
-          <p className="text-gray-600 mt-1">Manage all patient records and information</p>
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4">
+        {/* Search Input */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search patients..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all"
+          />
         </div>
+
+        {/* Quick Filter/Sort */}
+        <div className="w-full lg:w-72">
+          <select
+            value={filterGender ? `gender-${filterGender}` : `${sortBy}-${sortOrder}`}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val.startsWith('gender-')) {
+                setFilterGender(val.replace('gender-', ''));
+              } else {
+                setFilterGender('');
+                const [field, order] = val.split('-');
+                setSortBy(field);
+                setSortOrder(order);
+              }
+            }}
+            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-medium shadow-sm cursor-pointer appearance-none"
+          >
+            <optgroup label="Filter by Gender">
+              <option value="gender-">All Genders</option>
+              <option value="gender-Male">Male</option>
+              <option value="gender-Female">Female</option>
+              <option value="gender-Other">Other</option>
+            </optgroup>
+            <optgroup label="Sort By">
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="name-desc">Name (Z-A)</option>
+              <option value="age-asc">Age (Low-High)</option>
+              <option value="age-desc">Age (High-Low)</option>
+              <option value="lastVisit-desc">Recent Visit</option>
+              <option value="registrationDate-desc">Recent Registration</option>
+            </optgroup>
+          </select>
+        </div>
+
+        {/* Add Patient Button */}
         <Link
           href="/receptionist-dashboard/patients/add"
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-100 hover:shadow-xl active:scale-95 whitespace-nowrap"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add New Patient
         </Link>
       </div>
 
-      {/* Search and Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search patients..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          {/* Gender Filter */}
-          <select
-            value={filterGender}
-            onChange={(e) => setFilterGender(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">All Genders</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-
-          {/* Sort */}
-          <select
-            value={`${sortBy}-${sortOrder}`}
-            onChange={(e) => {
-              const [field, order] = e.target.value.split('-');
-              setSortBy(field);
-              setSortOrder(order);
-            }}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="name-asc">Name (A-Z)</option>
-            <option value="name-desc">Name (Z-A)</option>
-            <option value="age-asc">Age (Low-High)</option>
-            <option value="age-desc">Age (High-Low)</option>
-            <option value="lastVisit-desc">Recent Visit</option>
-            <option value="registrationDate-desc">Recent Registration</option>
-          </select>
-        </div>
-
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <span>
-              Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredPatients.length)}{' '}
-              of {filteredPatients.length} patients
+      {/* Results Summary & Table Area */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-gray-900">
+              {pagination.totalCount} Total Patients
+            </span>
+            <span className="text-xs text-gray-400 font-medium">
+              (Showing {patients.length} records)
             </span>
           </div>
-          <button className="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50">
-            <Download className="w-4 h-4 mr-2" />
-            Export
+          <button 
+            onClick={() => alert('Exporting data...')}
+            className="inline-flex items-center px-4 py-2 text-xs font-bold text-gray-600 hover:text-blue-600 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition-all shadow-sm"
+          >
+            <Download className="w-3.5 h-3.5 mr-2" />
+            Export Data
           </button>
         </div>
-      </div>
 
       {/* Patient Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -263,6 +311,9 @@ export default function PatientsPage() {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Contact
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Age
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Last Visit
@@ -278,7 +329,7 @@ export default function PatientsPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {paginatedPatients.length > 0 ? (
                 paginatedPatients.map((patient) => (
-                  <tr key={patient.id} className="hover:bg-gray-50">
+                  <tr key={patient.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => openPatientModal(patient)}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -287,9 +338,11 @@ export default function PatientsPage() {
                           </span>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{patient.name}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {patient.name} <span className="text-xs text-blue-500 font-bold ml-1">({patient.patientCode || 'N/A'})</span>
+                          </div>
                           <div className="text-sm text-gray-500">
-                            {patient.age} years, {patient.gender}
+                            {patient.gender}
                           </div>
                         </div>
                       </div>
@@ -308,28 +361,42 @@ export default function PatientsPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(patient.lastVisit).toLocaleDateString()}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 font-medium">
+                        {patient.age} Years
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {patient.doctor}
+                      {patient.lastVisit ? (
+                        new Date(patient.lastVisit).toLocaleDateString()
+                      ) : (
+                        <span className="text-gray-400 italic">No visits yet</span>
+                      )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {patient.doctor || (
+                        <span className="text-gray-400 italic">Not assigned</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => openPatientModal(patient)}
-                          className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
                         <Link
-                          href={`/dashboard/patients/${patient.id}/edit`}
+                          href={`/receptionist-dashboard/appointments/add?patientId=${patient.id}`}
+                          title="Book Appointment"
+                          className="text-amber-600 hover:text-amber-700 p-2 rounded-lg hover:bg-amber-50"
+                        >
+                          <Calendar className="w-4 h-4" />
+                        </Link>
+                        <Link
+                          href={`/receptionist-dashboard/patients/${patient.id}/edit`}
+                          title="Edit Patient"
                           className="text-green-600 hover:text-green-700 p-2 rounded-lg hover:bg-green-50"
                         >
                           <Edit className="w-4 h-4" />
                         </Link>
                         <button
                           onClick={() => handleDelete(patient.id)}
+                          title="Delete Patient"
                           className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -377,6 +444,8 @@ export default function PatientsPage() {
             </div>
           </div>
         )}
+      </div>
+
       </div>
 
       {/* Patient Details Modal */}
@@ -448,11 +517,82 @@ export default function PatientsPage() {
     <div>
       <p className="text-sm text-blue-700/80">Treating Doctor</p>
       <p className="font-medium text-blue-900">
-        {selectedPatient.doctor || 'Dr. Smith'}
+        {selectedPatient.doctor || 'Not assigned'}
       </p>
     </div>
   </div>
 </motion.div>
+
+                {/* Appointment History */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="bg-white rounded-2xl p-5 border border-blue-100/30"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-semibold text-blue-900 flex items-center gap-2">
+                      <Calendar className="w-5 h-5 text-blue-600" />
+                      Appointment History
+                    </h4>
+                    <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+                      {appointmentHistory.length} visits
+                    </span>
+                  </div>
+
+                  {loadingHistory ? (
+                    <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                    </div>
+                  ) : appointmentHistory.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Calendar className="w-10 h-10 text-blue-200 mx-auto mb-2" />
+                      <p className="text-sm text-blue-700/80">No appointment history found</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                      {appointmentHistory.map((appt, idx) => {
+                        const style = getHistoryStatusStyle(appt.status);
+                        return (
+                          <motion.div
+                            key={appt._id || idx}
+                            whileHover={{ scale: 1.01 }}
+                            className={`border rounded-xl p-4 ${style.border} ${style.bg} transition-all`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Stethoscope className="w-4 h-4 text-indigo-500" />
+                                <span className="text-sm font-semibold text-blue-900">
+                                  Dr. {appt.doctorId?.firstName || ''} {appt.doctorId?.lastName || ''}
+                                </span>
+                              </div>
+                              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${style.bg} ${style.text} border ${style.border}`}>
+                                {style.icon}
+                                {appt.status?.replace('_', ' ').toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-blue-700/80">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3.5 h-3.5" />
+                                {new Date(appt.appointmentDate).toLocaleDateString()}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5" />
+                                {appt.timeSlot}
+                              </span>
+                            </div>
+                            {appt.reason && (
+                              <p className="mt-2 text-xs text-blue-800/70 pl-1 border-l-2 border-blue-200 ml-1">
+                                {appt.reason}
+                              </p>
+                            )}
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </motion.div>
+
                 {/* Prescriptions */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}

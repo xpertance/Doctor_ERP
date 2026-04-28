@@ -1,4 +1,5 @@
-'use client'
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 import { motion } from 'framer-motion'
 import { Search, Filter, MapPin, ChevronDown, Star, X, Plus, Image as ImageIcon, Clock, Phone, Mail, Globe } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -31,20 +32,16 @@ export default function ClinicsPage() {
   ]
 
   const [clinics, setClinics] = useState([])
-useEffect(() => {
   const fetchClinics = async () => {
     try {
       setLoading(true);
-      const res = await fetch('https://practo-backend.vercel.app/api/clinic/fetch-all-clinics');
-
-      if (!res.ok) {
-        throw new Error('Failed to fetch clinics');
-      }
-
+      const res = await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-all-clinics`);
       const data = await res.json();
+
       if (data.success) {
-        // Filter clinics where status is 'approved'
-        const approvedClinics = data.clinics.filter(clinic => clinic.status === 'active');
+        // Filter clinics where status is 'active'
+        const clinicsList = data.data.clinics || [];
+        const approvedClinics = clinicsList.filter(clinic => clinic.status === 'active');
         setClinics(approvedClinics);
         setFilteredClinics(approvedClinics);
       } else {
@@ -58,14 +55,15 @@ useEffect(() => {
     }
   };
 
-  fetchClinics();
-}, []);
+  useEffect(() => {
+    fetchClinics();
+  }, []);
 
   // useEffect(() => {
   //   const fetchClinics = async () => {
   //     try {
   //       setLoading(true)
-  //       const res = await fetch('https://practo-backend.vercel.app/api/clinic/fetch-all-clinics')
+  //       const res = await fetch(`${API_BASE_URL}/api/clinic/fetch-all-clinics`)
         
   //       if (!res.ok) {
   //         throw new Error('Failed to fetch clinics')

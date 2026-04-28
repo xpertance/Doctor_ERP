@@ -1,5 +1,5 @@
-'use client'
-
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 import { useState, useEffect, useRef } from 'react';
 import { User, Mail, Phone, Calendar, MapPin, Clock, Award, Stethoscope, Building, Upload, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
@@ -74,9 +74,15 @@ const identityProofRef = useRef(null);
 
   const fetchUserData = async (id) => {
     try {
-      const res = await fetch(`https://practo-backend.vercel.app/api/clinic/fetchProfileData/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/clinic/fetchProfileData/${id}`);
       if (!res.ok) throw new Error('Failed to fetch doctor info');
-      const data = await res.json();
+      const responseData = await res.json();
+      
+      if (!responseData.success) {
+        throw new Error(responseData.message || 'Failed to fetch clinic info');
+      }
+
+      const data = responseData.data;
      
       setFormData(prev => ({
         ...prev,
@@ -235,7 +241,7 @@ const handleIdentityProofChange = async (e) => {
   }
 
   try {
-    const response = await axios.post('https://practo-backend.vercel.app/api/check-email', { 
+    const response = await axios.post(`${API_BASE_URL}/api/v1/auth/check-email`, { 
       email 
     }, {
       headers: {
@@ -243,8 +249,8 @@ const handleIdentityProofChange = async (e) => {
       }
     });
 
-    if (!response.data.available) {
-      return `This email is already registered as a ${response.data.existsIn}`;
+    if (!response.data.success || !response.data.data.available) {
+      return `This email is already registered as a ${response.data.data.existsIn || 'user'}`;
     }
     return '';
   } catch (error) {
@@ -254,7 +260,7 @@ const handleIdentityProofChange = async (e) => {
 };
   //  const checkEmailAvailability = async (email) => {
   //   try {
-  //     const response = await fetch('http://localhost:3001/api/check-email', {
+  //     const response = await fetch(`${API_BASE_URL}/api/check-email`, {
   //       method: 'POST',
   //       headers: {
   //         'Content-Type': 'application/json',
@@ -285,20 +291,24 @@ const handleSubmit = async (e) => {
 
   try {
     setIsSubmitting(true);
-   const { timeSlots, ...rest } = formData;
-const apiData = {
-  ...rest,
-  status: formData.status
-};
+    const { timeSlots, availableDays, availableTime, ...rest } = formData;
+    const apiData = {
+      ...rest,
+      status: formData.status,
+      available: {
+        days: availableDays,
+        time: availableTime
+      }
+    };
     console.log('Submitting data:', apiData);
     
-     const response = await axios.post('https://practo-backend.vercel.app/api/clinic/doctor-add', apiData);
+     const response = await axios.post(`${API_BASE_URL}/api/v1/clinic/doctor-add`, apiData);
     
     // Axios puts the response data in response.data
-    console.log('Response:', response.data);
+    const responseData = response.data;
     
-    if (response.status === 201) {
-      alert(response.data.message || "Doctor Added Successfully");
+    if (responseData.success) {
+      alert(responseData.message || "Doctor Added Successfully");
       
       // Reset form
       setFormData({
@@ -359,7 +369,7 @@ const apiData = {
       
   //     console.log('Submitting data:', apiData);
       
-  //      const response = await axios.post('http://localhost:3001/api/clinic/doctor-add', apiData);
+  //      const response = await axios.post(`${API_BASE_URL}/api/clinic/doctor-add`, apiData);
   //      const datt=await response.json();
   //      console.log(datt);
   //     console.log('Success: Register');
@@ -757,7 +767,7 @@ const nextStep = async (e) => {
                   
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Consultant Fee ($)
+                      Consultant Fee (₹)
                     </label>
                     <input
                       type="number"

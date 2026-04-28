@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useState } from 'react'
 import { 
   TrendingUp, 
@@ -6,7 +6,7 @@ import {
   Users, 
   Calendar,
   Activity,
-  DollarSign,
+  IndianRupee,
   Clock,
   UserPlus,
   BarChart3,
@@ -57,10 +57,10 @@ export default function AnalyticsPage() {
     },
     {
       title: 'Revenue',
-      value: '$124,580',
+      value: '₹124,580',
       change: '-2.4%',
       trend: 'down',
-      icon: DollarSign,
+      icon: IndianRupee,
       color: 'bg-orange-500'
     }
   ]
@@ -86,7 +86,7 @@ export default function AnalyticsPage() {
   const recentActivities = [
     { id: 1, type: 'appointment', message: 'New appointment scheduled with Dr. Sarah Johnson', time: '2 minutes ago', icon: Calendar },
     { id: 2, type: 'patient', message: 'New patient registration: John Doe', time: '15 minutes ago', icon: UserPlus },
-    { id: 3, type: 'revenue', message: 'Payment received: $350 from consultation', time: '1 hour ago', icon: DollarSign },
+    { id: 3, type: 'revenue', message: 'Payment received: ₹350 from consultation', time: '1 hour ago', icon: IndianRupee },
     { id: 4, type: 'doctor', message: 'Dr. Michael Chen updated availability', time: '2 hours ago', icon: Clock },
     { id: 5, type: 'appointment', message: 'Appointment completed: Jane Smith', time: '3 hours ago', icon: Activity }
   ]

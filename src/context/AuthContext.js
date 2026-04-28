@@ -1,5 +1,5 @@
-// context/AuthContext.js
 'use client';
+// context/AuthContext.js
 import { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
@@ -10,19 +10,25 @@ export const AuthProvider = ({ children }) => {
 
   // Load token/user from localStorage on first load
   useEffect(() => {
-    const savedToken = localStorage.getItem('token');
+    const rawToken = localStorage.getItem('token');
+    const savedToken = rawToken?.trim();
     const savedUser = localStorage.getItem('user');
 
     if (savedToken && savedUser) {
+      // If the token in storage was untrimmed, update it immediately to fix direct storage access in other components
+      if (rawToken !== savedToken) {
+        localStorage.setItem('token', savedToken);
+      }
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
     }
   }, []);
 
   const login = (token, user) => {
-    setToken(token);
+    const cleanToken = token?.trim();
+    setToken(cleanToken);
     setUser(user);
-    localStorage.setItem('token', token);
+    localStorage.setItem('token', cleanToken);
     localStorage.setItem('user', JSON.stringify(user));
   };
 

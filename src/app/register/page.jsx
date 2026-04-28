@@ -1,11 +1,11 @@
 'use client';
-
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock } from 'lucide-react';
 import { FiUser, FiMail, FiPhone, FiLock, FiCalendar } from 'react-icons/fi';
 import { FaHeartbeat, FaUserInjured, FaClinicMedical, FaStethoscope } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/utils/api';
 
 const specialties = [
   'Cardiology', 'Neurology', 'Pediatrics', 'Orthopedics',
@@ -90,7 +90,7 @@ export default function RegistrationPortal() {
 
   const checkEmailAvailability = async (email) => {
     try {
-      const response = await fetch('https://practo-backend.vercel.app/api/check-email', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/check-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -102,8 +102,8 @@ export default function RegistrationPortal() {
         throw new Error('Network response was not ok');
       }
 
-      const data = await response.json();
-      if (!data.available) {
+      const responseData = await response.json();
+      if (!responseData.success || !responseData.data.available) {
         return `This email is already registered `;
       }
       return null;
@@ -276,17 +276,23 @@ export default function RegistrationPortal() {
     if (currentPatientStep === 3) {
       setIsPatientLoading(true);
       try {
-        const response = await fetch('https://practo-backend.vercel.app/api/patients/register', {
+        const response = await fetch(`${API_BASE_URL}/api/v1/patient/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(patientFormData)
+          body: JSON.stringify({
+            ...patientFormData,
+            phoneNumber: patientFormData.phone,
+            dateOfBirth: patientFormData.dob,
+            bloodGroup: patientFormData.bloodType
+          })
+
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          console.log('Registration successful:', result);
+        const responseData = await response.json();
+        if (responseData.success) {
+          console.log('Registration successful:', responseData.data);
           setPatientRegistrationSuccess(true);
 
           setTimeout(() => {
@@ -307,9 +313,8 @@ export default function RegistrationPortal() {
             setPatientRegistrationSuccess(false);
           }, 2000);
         } else {
-          const error = await response.json();
-          console.error('Registration failed:', error);
-          alert(`Registration failed: ${error.message || 'Server Error'}`);
+          console.error('Registration failed:', responseData.message);
+          alert(`Registration failed: ${responseData.message || 'Server Error'}`);
           setIsPatientLoading(false);
         }
       } catch (err) {
@@ -622,7 +627,7 @@ const handleDoctorInputChange = (field, value) => {
     };
 
     try {
-      const response = await fetch('https://practo-backend.vercel.app/api/doctor/register', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/doctor/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -630,15 +635,11 @@ const handleDoctorInputChange = (field, value) => {
         body: JSON.stringify(cleanedData),
       });
 
-      const data = await response.json();
+      const responseData = await response.json();
 
-      if (!response.ok) {
-        console.error('API Error:', data.message);
-        return;
-      }
-
-      console.log('Submission successful:', data);
-      setDoctorSuccess(true);
+      if (responseData.success) {
+        console.log('Submission successful:', responseData.data);
+        setDoctorSuccess(true);
 
       // Reset form and close modal after 2 seconds
       setTimeout(() => {
@@ -689,6 +690,10 @@ const handleDoctorInputChange = (field, value) => {
         setShowDoctorModal(false);
         router.push('/login'); // Redirect to login page
       }, 2000);
+    } else {
+      console.error('Submission failed:', responseData.message);
+      alert(`Registration failed: ${responseData.message || 'Please try again'}`);
+    }
     } catch (error) {
       console.error('Submission error:', error);
     } finally {
@@ -756,7 +761,7 @@ const handleDoctorInputChange = (field, value) => {
   // console.log("data",cleanedData);
   //     try {
 
-  //       const response = await fetch('http://localhost:3001/api/doctor/register', {
+  //       const response = await fetch(`${API_BASE_URL}/api/doctor/register`, {
   //         method: 'POST',
   //         headers: {
   //           'Content-Type': 'application/json',
@@ -874,20 +879,15 @@ const handleDoctorInputChange = (field, value) => {
 
     if (step === 0) {
       if (!clinicFormData.clinicName.trim()) newErrors.clinicName = 'Clinic name is required';
-      if (!clinicFormData.clinicType) newErrors.clinicType = 'Clinic type is required';
     }
     else if (step === 1) {
-      if (!clinicFormData.address.trim()) newErrors.address = 'Address is required';
-      if (!clinicFormData.city.trim()) newErrors.city = 'City is required';
-      if (!clinicFormData.country.trim()) newErrors.country = 'Country is required';
-      if (!clinicFormData.phone.trim()) newErrors.phone = 'Phone is required';
       if (!clinicFormData.email.trim()) newErrors.email = 'Email is required';
       else if (!/^\S+@\S+\.\S+$/.test(clinicFormData.email)) newErrors.email = 'Invalid email format';
       if (!clinicFormData.password) newErrors.password = 'Password is required';
       else if (clinicFormData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
     }
     else if (step === 2) {
-      if (!clinicFormData.licenseDocumentUrl) newErrors.licenseDocument = 'License document is required';
+      // Step 2 (Business Information) is now completely optional
     }
 
     setClinicErrors(newErrors);
@@ -1014,21 +1014,17 @@ const handleDoctorInputChange = (field, value) => {
 
     // Here you would typically make your API call
     try {
-      const response = await fetch('https://practo-backend.vercel.app/api/clinic/register', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(clinicFormData)
       });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
-      }
-
-      const data = await response.json();
-      console.log('Registration successful:', data);
-      setClinicRegistrationSuccess(true);
+      const responseData = await response.json();
+      if (responseData.success) {
+        console.log('Registration successful:', responseData.data);
+        setClinicRegistrationSuccess(true);
 
       // Reset form after success
       setTimeout(() => {
@@ -1062,7 +1058,11 @@ const handleDoctorInputChange = (field, value) => {
         setCurrentClinicStep(0);
         setShowClinicModal(false);
       }, 2000);
-    } catch (error) {
+    } else {
+      console.error('Registration failed:', responseData.message);
+      alert(`Registration failed: ${responseData.message || 'Please try again'}`);
+    }
+    } catch (err) {
       console.error('Error submitting clinic form:', err);
       alert(`Registration failed: ${err.message || 'Please try again'}`);
     } finally {
@@ -1093,7 +1093,7 @@ const handleDoctorInputChange = (field, value) => {
   //   }
 
   //   // try {
-  //   //   const response = await fetch('https://practo-backend.vercel.app/api/clinic/register', {
+  //   //   const response = await fetch(`${API_BASE_URL}/api/clinic/register`, {
   //   //     method: 'POST',
   //   //     headers: {
   //   //       'Content-Type': 'application/json',
@@ -1307,7 +1307,7 @@ const handleDoctorInputChange = (field, value) => {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Address <span className="text-red-500">*</span>
+                  Address
                 </label>
                 <input
                   type="text"
@@ -1325,7 +1325,7 @@ const handleDoctorInputChange = (field, value) => {
 
               <div>
                 <label htmlFor="city" className="block text-sm font-semibold text-gray-700 mb-2">
-                  City <span className="text-red-500">*</span>
+                  City
                 </label>
                 <input
                   type="text"
@@ -1373,7 +1373,7 @@ const handleDoctorInputChange = (field, value) => {
 
               <div>
                 <label htmlFor="country" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Country <span className="text-red-500">*</span>
+                  Country
                 </label>
                 <input
                   type="text"
@@ -1391,7 +1391,7 @@ const handleDoctorInputChange = (field, value) => {
 
               <div>
                 <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phone Number <span className="text-red-500">*</span>
+                  Phone Number
                 </label>
                 <input
                   type="tel"
@@ -1557,7 +1557,7 @@ const handleDoctorInputChange = (field, value) => {
               <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 transition-all duration-300 hover:border-orange-400">
                 <div className="text-center">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Clinic License Document*
+                    Clinic License Document
                   </label>
                   <p className="text-xs text-gray-500 mb-4">
                     Upload your clinic's license certificate (PDF, JPG, PNG)

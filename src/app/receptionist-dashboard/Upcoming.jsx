@@ -1,6 +1,5 @@
+'use client';
 // app/components/Dashboard/UpcomingAppointments.jsx
-'use client'
-
 import { useState, useEffect } from 'react'
 import { ClockIcon, UserIcon } from '@heroicons/react/24/outline'
 

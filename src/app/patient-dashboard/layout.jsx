@@ -1,6 +1,5 @@
-// // 'use client'
-
-// // import { useState,useEffect } from 'react'
+'use client';
+// // // // import { useState,useEffect } from 'react'
 // // import { usePathname } from 'next/navigation'
 // // import { FiHome, FiCalendar, FiFileText, FiPieChart, FiSettings, FiUser, FiMenu, FiX } from 'react-icons/fi'
 // // import { FaHeartbeat, FaClinicMedical } from 'react-icons/fa'
@@ -158,9 +157,7 @@
 // //   )
 // // }
 
-// 'use client'
- 
-// import { useState,useEffect } from 'react'
+// // import { useState,useEffect } from 'react'
 // import { usePathname } from 'next/navigation'
 // import { FiHome, FiCalendar, FiFileText, FiPieChart, FiSettings, FiUser, FiMenu, FiX } from 'react-icons/fi'
 // import { FaHeartbeat, FaClinicMedical } from 'react-icons/fa'
@@ -331,8 +328,6 @@
 // }
 
 
-'use client'
- 
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { FiHome, FiCalendar, FiFileText, FiPieChart, FiSettings, FiUser, FiMenu, FiX, FiBell } from 'react-icons/fi'
@@ -340,6 +335,7 @@ import { FaHeartbeat, FaClinicMedical } from 'react-icons/fa'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LogOut } from 'lucide-react'
+import { ROLES } from '@/constants/roles';
 
 export default function DashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -359,14 +355,14 @@ export default function DashboardLayout({ children }) {
       const user = JSON.parse(userStr)
       console.log(user)
       
-      if (user.role !== "patient") {
+      if (user.role !== ROLES.PATIENT) {
         router.push('/login')
       }
     } catch (error) {
       console.error('Invalid user data in localStorage')
       router.push('/login')
     }
-  }, [router])
+  }, [])
 
   const navItems = [
     { name: 'Overview', href: '/patient-dashboard', icon: <FiHome size={20} /> },

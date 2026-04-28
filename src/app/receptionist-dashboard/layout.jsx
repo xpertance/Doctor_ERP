@@ -1,9 +1,10 @@
-// components/layout/DashboardLayout.jsx
 'use client';
+// components/layout/DashboardLayout.jsx
 import { useState ,useEffect} from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { useRouter } from 'next/navigation'
+import { ROLES } from '@/constants/roles';
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
@@ -22,14 +23,14 @@ export default function DashboardLayout({ children }) {
          console.log(user)
   
      
-        if (user.role !== "Receptionist") {
+        if (user.role !== ROLES.RECEPTIONIST) {
           router.push('/login')
         }
       } catch (error) {
         console.error('Invalid user data in localStorage')
         router.push('/login')
       }
-    }, [router])
+    }, [])
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}

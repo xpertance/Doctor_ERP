@@ -1,12 +1,12 @@
-"use client";
-
+'use client';
 import { useState, useRef, useEffect } from 'react';
+import { API_BASE_URL } from '@/utils/api';
 import { 
   Download, 
   Printer, 
   Search, 
   Filter, 
-  DollarSign, 
+  IndianRupee, 
   Calendar, 
   User,
   Clock,
@@ -42,39 +42,48 @@ export default function DoctorBilling() {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await fetch(`https://practo-backend.vercel.app/api/appointment/fetchbydoctor/${doctorId}`);
-      if (!res.ok) throw new Error('Failed to fetch appointments');
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/api/v1/appointment/fetchbydoctor/${doctorId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const response = await res.json();
       
-      // Convert checked-in appointments to billing format
-      const checkedInBills = response.data
-        .filter(app => app.status === 'checkedIn')
-        .map(app => ({
-          id: `INV-${app._id.substring(0, 8).toUpperCase()}`,
-          patientName: app.patientName,
-          patientId: app._id,
-          date: new Date(app.appointmentDate).toISOString().split('T')[0],
-          dueDate: new Date(new Date(app.appointmentDate).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          amount: (app.medicines?.reduce((sum, med) => sum + (med.price || 0), 0) || 0) + (app.consultationFee || 0),
-          status: 'Pending', // Default status for new bills
-          insurance: app.insuranceProvider || 'Self-Pay',
-          services: [
-            { 
-              code: 'CONSULT', 
-              description: 'Consultation Fee', 
-              quantity: 1, 
-              price: app.consultationFee || 0 
-            },
-            ...(app.medicines?.map(med => ({
-              code: med.code || 'MED-' + med.name.substring(0, 3).toUpperCase(),
-              description: med.name,
-              quantity: med.quantity || 1,
-              price: med.price || 0
-            })) || [])
-          ]
-        }));
-      
-      setBills(checkedInBills);
+      if (response.success) {
+        const appointments = response.data.appointments || [];
+        // Convert checked-in appointments to billing format
+        const checkedInBills = appointments
+          .filter(app => app.status === 'checkedIn')
+          .map(app => ({
+            id: `INV-${app._id.substring(0, 8).toUpperCase()}`,
+            patientName: app.patientName,
+            patientId: app._id,
+            date: new Date(app.appointmentDate).toISOString().split('T')[0],
+            dueDate: new Date(new Date(app.appointmentDate).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            amount: (app.medicines?.reduce((sum, med) => sum + (med.price || 0), 0) || 0) + (app.consultationFee || 0),
+            status: 'Pending', // Default status for new bills
+            insurance: app.insuranceProvider || 'Self-Pay',
+            services: [
+              { 
+                code: 'CONSULT', 
+                description: 'Consultation Fee', 
+                quantity: 1, 
+                price: app.consultationFee || 0 
+              },
+              ...(app.medicines?.map(med => ({
+                code: med.code || 'MED-' + med.name.substring(0, 3).toUpperCase(),
+                description: med.name,
+                quantity: med.quantity || 1,
+                price: med.price || 0
+              })) || [])
+            ]
+          }));
+        
+        setBills(checkedInBills);
+      } else {
+        setError(response.message || 'Failed to fetch appointments');
+      }
     } catch (err) {
       setError(err.message);
       console.error("Error fetching appointments:", err);
@@ -163,11 +172,11 @@ export default function DoctorBilling() {
               <div>
                 <p className="text-gray-500 text-sm">Total Revenue</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  ${bills.reduce((sum, b) => sum + b.amount, 0).toLocaleString()}
+                  ₹{bills.reduce((sum, b) => sum + b.amount, 0).toLocaleString()}
                 </p>
               </div>
               <div className="bg-blue-100 p-3 rounded-full">
-                <DollarSign className="text-blue-600" size={20} />
+                <IndianRupee className="text-blue-600" size={20} />
               </div>
             </div>
           </div>
@@ -245,7 +254,7 @@ export default function DoctorBilling() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.patientId}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.date}</td>
 
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${bill.amount.toFixed(2)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">₹{bill.amount.toFixed(2)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(bill.status)}`}>
                         {bill.status}
@@ -349,8 +358,8 @@ export default function DoctorBilling() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{service.code}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{service.description}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{service.quantity}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${service.price.toFixed(2)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${(service.quantity * service.price).toFixed(2)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">₹{service.price.toFixed(2)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">₹{(service.quantity * service.price).toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -361,15 +370,15 @@ export default function DoctorBilling() {
                 <div className="w-64">
                   <div className="flex justify-between py-2 border-b border-gray-200">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="text-gray-800">${selectedBill.amount.toFixed(2)}</span>
+                    <span className="text-gray-800">₹{selectedBill.amount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-gray-200">
                     <span className="text-gray-600">Insurance Adjustment</span>
-                    <span className="text-gray-800">$0.00</span>
+                    <span className="text-gray-800">₹0.00</span>
                   </div>
                   <div className="flex justify-between py-2">
                     <span className="text-gray-800 font-semibold">Patient Balance</span>
-                    <span className="text-gray-800 font-bold">${selectedBill.amount.toFixed(2)}</span>
+                    <span className="text-gray-800 font-bold">₹{selectedBill.amount.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -425,15 +434,15 @@ export default function DoctorBilling() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
                     <p className="text-sm text-blue-600 font-medium">Total Revenue</p>
-                    <p className="text-xl font-bold text-blue-800">${bills.reduce((sum, b) => sum + b.amount, 0).toLocaleString()}</p>
+                    <p className="text-xl font-bold text-blue-800">₹{bills.reduce((sum, b) => sum + b.amount, 0).toLocaleString()}</p>
                   </div>
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
                     <p className="text-sm text-blue-600 font-medium">Outstanding</p>
-                    <p className="text-xl font-bold text-red-600">${bills.filter(b => b.status === 'Overdue').reduce((sum, b) => sum + b.amount, 0).toLocaleString()}</p>
+                    <p className="text-xl font-bold text-red-600">₹{bills.filter(b => b.status === 'Overdue').reduce((sum, b) => sum + b.amount, 0).toLocaleString()}</p>
                   </div>
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
                     <p className="text-sm text-blue-600 font-medium">Pending Claims</p>
-                    <p className="text-xl font-bold text-yellow-600">${bills.filter(b => b.status === 'Pending').reduce((sum, b) => sum + b.amount, 0).toLocaleString()}</p>
+                    <p className="text-xl font-bold text-yellow-600">₹{bills.filter(b => b.status === 'Pending').reduce((sum, b) => sum + b.amount, 0).toLocaleString()}</p>
                   </div>
                 </div>
               </div>
@@ -460,7 +469,7 @@ export default function DoctorBilling() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{bill.id}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.patientName}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.date}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${bill.amount.toFixed(2)}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">₹{bill.amount.toFixed(2)}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(bill.status)}`}>
                               {bill.status}
@@ -477,11 +486,11 @@ export default function DoctorBilling() {
                 <div className="w-64">
                   <div className="flex justify-between py-2 border-b border-blue-200">
                     <span className="text-blue-600">Total Billed</span>
-                    <span className="text-blue-800">${bills.reduce((sum, b) => sum + b.amount, 0).toFixed(2)}</span>
+                    <span className="text-blue-800">₹{bills.reduce((sum, b) => sum + b.amount, 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between py-2">
                     <span className="text-blue-800 font-semibold">Total Outstanding</span>
-                    <span className="text-blue-800 font-bold">${bills.filter(b => b.status === 'Overdue').reduce((sum, b) => sum + b.amount, 0).toFixed(2)}</span>
+                    <span className="text-blue-800 font-bold">₹{bills.filter(b => b.status === 'Overdue').reduce((sum, b) => sum + b.amount, 0).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -516,7 +525,7 @@ export default function DoctorBilling() {
                         <td className="border border-gray-300 px-4 py-2">{bill.id}</td>
                         <td className="border border-gray-300 px-4 py-2">{bill.patientName}</td>
                         <td className="border border-gray-300 px-4 py-2">{bill.date}</td>
-                        <td className="border border-gray-300 px-4 py-2">${bill.amount.toFixed(2)}</td>
+                        <td className="border border-gray-300 px-4 py-2">₹{bill.amount.toFixed(2)}</td>
                         <td className="border border-gray-300 px-4 py-2">{bill.status}</td>
                       </tr>
                     ))}
@@ -527,11 +536,11 @@ export default function DoctorBilling() {
                   <div className="inline-block">
                     <div className="flex justify-between py-1 border-b border-gray-300 w-64">
                       <span>Total Billed:</span>
-                      <span>${bills.reduce((sum, b) => sum + b.amount, 0).toFixed(2)}</span>
+                      <span>₹{bills.reduce((sum, b) => sum + b.amount, 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between py-1 border-b border-gray-300 w-64">
                       <span>Total Outstanding:</span>
-                      <span>${bills.filter(b => b.status === 'Overdue').reduce((sum, b) => sum + b.amount, 0).toFixed(2)}</span>
+                      <span>₹{bills.filter(b => b.status === 'Overdue').reduce((sum, b) => sum + b.amount, 0).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

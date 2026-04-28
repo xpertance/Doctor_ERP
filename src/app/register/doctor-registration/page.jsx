@@ -1,5 +1,5 @@
-'use client'
-
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion'
@@ -243,7 +243,7 @@ export default function DoctorSignup() {
     }
 
     try {
-      const response = await fetch('https://practo-backend.vercel.app/api/doctor/register', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/doctor/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -251,15 +251,14 @@ export default function DoctorSignup() {
         body: JSON.stringify(cleanedData),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (!response.ok) {
-        console.error('API Error:', data.message);
-        setErrors({ submit: data.message || 'Registration failed' });
-        return;
+      if (result.success) {
+        setSuccess(true);
+      } else {
+        console.error('API Error:', result.message);
+        setErrors({ submit: result.message || 'Registration failed' });
       }
-
-      setSuccess(true);
     } catch (error) {
       console.error('Submission error:', error);
       setErrors({ submit: 'Network or server error occurred' });

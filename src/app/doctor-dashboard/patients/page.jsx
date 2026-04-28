@@ -1,6 +1,7 @@
-'use client'
-
+'use client';
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/utils/api';
 import { Dialog } from '@headlessui/react';
 import { Search, Plus, Edit, Trash2, Eye, Filter, Download, Calendar, Phone, Mail, MapPin, User, Shield, X, Pill } from 'lucide-react';
 
@@ -46,7 +47,7 @@ const PatientModal = ({ showModal, selectedPatient, closeModal, modalType, formD
               {/* Patient Summary Card */}
               <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/10 mb-6">
                 <div className="flex items-center space-x-3 mb-3">
-                  <div className="bg-white/20 p-2 rounded-lg">
+                  <div className="bg-white/20 p-2 rounded-lg hidden">
                     <User className="w-5 h-5" />
                   </div>
                   <div>
@@ -370,9 +371,11 @@ const PatientModal = ({ showModal, selectedPatient, closeModal, modalType, formD
 };
 
 const PatientManagementPage = () => {
+  const router = useRouter();
   const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('All');
+  const [filterDate, setFilterDate] = useState('');
+  const [filterMonth, setFilterMonth] = useState('');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('view');
@@ -399,43 +402,62 @@ const PatientManagementPage = () => {
     }
   }, []);
 
- 
+
 
   const fetchAppointmentsByDoc = async (doctorId) => {
     try {
-      const res = await fetch(`https://practo-backend.vercel.app/api/appointment/fetchbydoctor/${doctorId}`);
-      if (!res.ok) throw new Error('Failed to fetch appointments');
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/api/v1/appointment/fetchbydoctor/${doctorId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const response = await res.json();
-      const checkedInPatients = response.data
-        .filter(app => app.status === 'checkedIn')
-        .map(app => ({
-          _id: app._id,
-          id: app._id,
-          name: app.patientName,
-          age: app.patientAge || 0,
-          gender: app.patientDetails?.gender || 'Unknown',
-          phone: app.patientNumber,
-          email: app.patientEmail || 'No email',
-          address: app.patientAddress || 'No address',
-          lastVisit: new Date(app.appointmentDate).toLocaleDateString(),
-          condition: app.patientNote || 'No condition specified',
-          status: 'Active',
-          bloodType: app.patientDetails?.bloodType || 'Unknown',
-          emergencyContact: app.patientEmergencyContact || 'Not provided',
-          prescriptions: app.medicines ? [{
-            date: new Date(app.appointmentDate).toLocaleDateString(),
-            doctor: 'Dr. You',
-            medicines: app.medicines.map(med => ({
-              name: med.name || 'Unknown medicine',
-              dosage: med.dosage || 'As prescribed',
-              frequency: med.frequency || 'Daily',
-              duration: med.duration || 'Until finished'
-            })),
-            notes: app.description || 'No additional notes'
-          }] : []
-        }));
-      
-      setPatients(checkedInPatients);
+
+      if (response.success) {
+        const appointments = response.data.appointments || [];
+
+        // Show all non-cancelled appointments (scheduled, checkedIn, completed)
+        const relevantPatients = appointments
+          .filter(app => app.status !== 'cancelled')
+          .map(app => ({
+            _id: app.patientId?._id || app.patientId || app.patientDetails?._id || app._id,
+            id: app.patientId?._id || app.patientId || app.patientDetails?._id || app._id,
+            name: app.patientDetails ? `${app.patientDetails.firstName} ${app.patientDetails.lastName}` : 'Unknown Patient',
+            age: app.patientDetails?.age || 0,
+            gender: app.patientDetails?.gender || 'Unknown',
+            phone: app.patientDetails?.phoneNumber || 'N/A',
+            email: app.patientDetails?.email || 'No email',
+            address: app.patientDetails?.city || 'No address',
+            lastVisit: new Date(app.appointmentDate).toLocaleDateString(),
+            lastVisitRaw: app.appointmentDate,
+            condition: app.reason || 'No condition specified',
+            status: 'Active',
+            bloodType: app.patientDetails?.bloodGroup || 'Unknown',
+            emergencyContact: app.patientDetails?.emergencyContact || 'Not provided',
+            prescriptions: app.medicines ? [{
+              date: new Date(app.appointmentDate).toLocaleDateString(),
+              doctor: 'Self',
+              medicines: app.medicines.map(med => ({
+                name: med.name || 'Unknown medicine',
+                dosage: med.dosage || 'As prescribed',
+                frequency: med.frequency || 'Daily',
+                duration: med.duration || 'Until finished'
+              })),
+              notes: app.description || 'No additional notes'
+            }] : []
+          }));
+
+        // deduplicate by patient ID if multiple appointments exist for the same patient
+        const uniquePatientsMap = new Map();
+        relevantPatients.forEach(p => {
+          if (!uniquePatientsMap.has(p.name)) {
+            uniquePatientsMap.set(p.name, p);
+          }
+        });
+
+        setPatients(Array.from(uniquePatientsMap.values()));
+      }
     } catch (error) {
       console.error("Error fetching appointments:", error);
     }
@@ -449,20 +471,38 @@ const PatientManagementPage = () => {
 
   const filteredPatients = patients.filter(patient => {
     const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         patient.condition.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'All' || patient.status === filterStatus;
-    return matchesSearch && matchesFilter;
+      patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.condition.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    let matchesDate = true;
+    if (filterDate) {
+      if (!patient.lastVisitRaw) {
+        matchesDate = false;
+      } else {
+        const patientDateStr = new Date(patient.lastVisitRaw).toISOString().split('T')[0];
+        matchesDate = (patientDateStr === filterDate);
+      }
+    } else if (filterMonth) {
+      if (!patient.lastVisitRaw) {
+        matchesDate = false;
+      } else {
+        const patientDate = new Date(patient.lastVisitRaw);
+        const [year, month] = filterMonth.split('-');
+        matchesDate = (patientDate.getFullYear() === parseInt(year) && (patientDate.getMonth() + 1) === parseInt(month));
+      }
+    }
+    
+    return matchesSearch && matchesDate;
   });
 
   const openModal = async (type, patient = null) => {
     setModalType(type);
-    
+
     if (type === 'view' && patient) {
-    
-        setSelectedPatient(patient);
-        setFormData({ ...patient });
-      
+
+      setSelectedPatient(patient);
+      setFormData({ ...patient });
+
     } else if (patient) {
       setSelectedPatient(patient);
       setFormData({ ...patient });
@@ -507,7 +547,7 @@ const PatientManagementPage = () => {
       alert('Please fill in all required fields');
       return;
     }
-    
+
     if (modalType === 'add') {
       const newPatient = {
         ...formData,
@@ -535,11 +575,7 @@ const PatientManagementPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Patient Management</h1>
-          <p className="text-gray-600">Manage and track patient information efficiently</p>
-        </div>
+      <div className="max-w-7xl mx-auto pt-4">
 
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
@@ -555,17 +591,42 @@ const PatientManagementPage = () => {
                 />
               </div>
 
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <select
-                  className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                >
-                  <option value="All">All Status</option>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative flex items-center">
+                  <input
+                    type="date"
+                    className="pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white text-sm text-gray-700 w-full sm:w-auto"
+                    value={filterDate}
+                    onChange={(e) => {
+                      setFilterDate(e.target.value);
+                      setFilterMonth('');
+                    }}
+                    title="Filter by Date"
+                  />
+                </div>
+                <div className="relative flex items-center">
+                  <input
+                    type="month"
+                    className="pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white text-sm text-gray-700 w-full sm:w-auto"
+                    value={filterMonth}
+                    onChange={(e) => {
+                      setFilterMonth(e.target.value);
+                      setFilterDate('');
+                    }}
+                    title="Filter by Month"
+                  />
+                </div>
+                {(filterDate || filterMonth) && (
+                  <button 
+                    onClick={() => {
+                      setFilterDate('');
+                      setFilterMonth('');
+                    }}
+                    className="text-xs text-rose-500 hover:text-rose-600 font-medium px-2 py-1 rounded-md hover:bg-rose-50 transition-colors"
+                  >
+                    Reset
+                  </button>
+                )}
               </div>
             </div>
 
@@ -585,58 +646,17 @@ const PatientManagementPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="mb-6">
+          <div className="bg-white rounded-lg shadow-sm p-6 max-w-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Patients</p>
-                <p className="text-2xl font-bold text-gray-900">{patients.length}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  {(filterDate || filterMonth) ? 'Filtered Patients' : 'Total Patients'}
+                </p>
+                <p className="text-2xl font-bold text-gray-900">{filteredPatients.length}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                 <User className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Patients</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {patients.filter(p => p.status === 'Active').length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Inactive Patients</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {patients.filter(p => p.status === 'Inactive').length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-red-600" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">This Month</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {patients.filter(p => {
-                    const lastVisit = new Date(p.lastVisit);
-                    const now = new Date();
-                    return lastVisit.getMonth() === now.getMonth() && lastVisit.getFullYear() === now.getFullYear();
-                  }).length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-purple-600" />
               </div>
             </div>
           </div>
@@ -648,7 +668,10 @@ const PatientManagementPage = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Patient
+                    Patient Code
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Patient Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Contact
@@ -666,16 +689,19 @@ const PatientManagementPage = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredPatients.map((patient) => (
-                  <tr key={patient._id || patient.id} className="hover:bg-gray-50">
+                  <tr key={patient._id || patient.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/doctor-dashboard/patients/${patient._id || patient.id}`)}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
+                      {patient.patientCode || 'N/A'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hidden">
                           <User className="w-5 h-5 text-blue-600" />
                         </div>
-                        <div className="ml-4">
+                        <div className="">
                           <div className="text-sm font-medium text-gray-900 capitalize">{patient.name}</div>
                           <div className="text-sm text-gray-500">
-                             {patient.gender || 'N/A'}
+                            {patient.gender || 'N/A'}
                           </div>
                         </div>
                       </div>
@@ -697,22 +723,22 @@ const PatientManagementPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {patient.lastVisit || 'N/A'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
                       <div className="flex justify-end gap-2">
                         <button
-                          onClick={() => openModal('view', patient)}
-                          className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => openModal('edit', patient)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openModal('edit', patient);
+                          }}
                           className="text-green-600 hover:text-green-900 p-1 hover:bg-green-50 rounded"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => deletePatient(patient._id || patient.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deletePatient(patient._id || patient.id);
+                          }}
                           className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
                         >
                           <Trash2 className="w-4 h-4" />

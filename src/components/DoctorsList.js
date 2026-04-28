@@ -1,5 +1,5 @@
 'use client';
-
+import { API_BASE_URL } from '@/utils/api';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Star, MapPin, Clock, ChevronRight, Filter } from 'lucide-react';
@@ -19,16 +19,19 @@ export default function DoctorsList() {
     const fetchDoctors = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch('https://practo-backend.vercel.app/api/doctor/fetchAll');
-        if (!res.ok) {
-          throw new Error(`API request failed with status ${res.status}`);
+        const res = await fetch(`${API_BASE_URL}/api/v1/doctor/fetchAll`);
+        const result = await res.json();
+        
+        if (result.success) {
+          const doctorsData = result.data.doctors;
+          if (!Array.isArray(doctorsData)) {
+            throw new Error('Invalid API response format: data.doctors is not an array');
+          }
+          setDoctors(doctorsData);
+          setFilteredDoctors(doctorsData);
+        } else {
+          throw new Error(result.message || 'Failed to load doctors');
         }
-        const data = await res.json();
-        if (!data.doctors || !Array.isArray(data.doctors)) {
-          throw new Error('Invalid API response format');
-        }
-        setDoctors(data.doctors);
-        setFilteredDoctors(data.doctors);
       } catch (err) {
         console.error('Error fetching doctors:', err.message);
         setError(err.message || 'Failed to load doctors');

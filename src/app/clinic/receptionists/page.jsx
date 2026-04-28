@@ -1,9 +1,8 @@
-'use client'
-
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 import { useState, useEffect } from 'react';
-import { FiSearch, FiUserPlus, FiEdit2, FiTrash2, FiChevronLeft, FiChevronRight, FiX, FiEye, FiEyeOff, FiAlertCircle } from 'react-icons/fi';
+import { FiSearch, FiUserPlus, FiEdit2, FiTrash2, FiChevronLeft, FiChevronRight, FiX, FiEye, FiEyeOff, FiAlertCircle, FiRefreshCw, FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import { MdOutlineVerified, MdOutlinePending } from 'react-icons/md';
-import { FiRotateCw , CheckCircle, XCircle } from 'react-icons/fi';
 
 const ReceptionistManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,19 +48,18 @@ const ReceptionistManagement = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`https://practo-backend.vercel.app/api/clinic/fetch-receptionist/${id}`);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch receptionists');
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-receptionist/${id}`);
+      const responseData = await response.json();
+
+      if (!responseData.success) {
+        throw new Error(responseData.message || 'Failed to fetch receptionists');
       }
 
-      const data = await response.json();
-      if (!data.staff || !Array.isArray(data.staff)) {
+      if (!responseData.data.staff || !Array.isArray(responseData.data.staff)) {
         throw new Error('Invalid data format received from server');
       }
 
-      setReceptionists(data.staff);
+      setReceptionists(responseData.data.staff);
     } catch (err) {
       console.error('Error fetching receptionists:', err);
       setError(err.message || 'Failed to load receptionists. Please try again later.');
@@ -110,13 +108,14 @@ const ReceptionistManagement = () => {
 
     setDeleteLoading(true);
     try {
-      const response = await fetch(`https://practo-backend.vercel.app/api/reciptionist/delete/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/clinic/delete-receptionist/${id}`, {
         method: 'DELETE',
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete receptionist');
+      const responseData = await response.json();
+
+      if (!responseData.success) {
+        throw new Error(responseData.message || 'Failed to delete receptionist');
       }
 
       setReceptionists(prev => prev.filter(r => r._id !== id));
@@ -193,7 +192,7 @@ const ReceptionistManagement = () => {
       let response;
       if (currentReceptionist) {
         // Update existing receptionist
-        response = await fetch(`https://practo-backend.vercel.app/api/reciptionist/update-by-id/${currentReceptionist._id}`, {
+        response = await fetch(`${API_BASE_URL}/api/v1/clinic/update-receptionist/${currentReceptionist._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -202,7 +201,7 @@ const ReceptionistManagement = () => {
         });
       } else {
         // Create new receptionist
-        response = await fetch('https://practo-backend.vercel.app/api/clinic/add-receptinist', {
+        response = await fetch(`${API_BASE_URL}/api/v1/clinic/add-receptionist`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -211,12 +210,13 @@ const ReceptionistManagement = () => {
         });
       }
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save receptionist');
+      const responseData = await response.json();
+
+      if (!responseData.success) {
+        throw new Error(responseData.message || 'Failed to save receptionist');
       }
 
-      const savedReceptionist = await response.json();
+      const savedReceptionist = responseData.data.staff || responseData.data.receptionist;
 
       if (currentReceptionist) {
         setReceptionists(prev => 
@@ -277,7 +277,7 @@ const ReceptionistManagement = () => {
       )}
       {successMessage && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-start gap-2">
-          <CheckCircle className="flex-shrink-0 mt-0.5" />
+          <FiCheckCircle className="flex-shrink-0 mt-0.5" />
           <span>{successMessage}</span>
         </div>
       )}
@@ -315,7 +315,7 @@ const ReceptionistManagement = () => {
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <FiRotateCw  className="animate-spin h-8 w-8 text-indigo-600" />
+            <FiRefreshCw  className="animate-spin h-8 w-8 text-indigo-600" />
             <span className="ml-2">Loading receptionists...</span>
           </div>
         ) : error && receptionists.length === 0 ? (
@@ -327,7 +327,7 @@ const ReceptionistManagement = () => {
               onClick={() => fetchReceptionists(Id)}
               className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
             >
-              <FiRotateCw className="mr-2 h-4 w-4" />
+              <FiRefreshCw className="mr-2 h-4 w-4" />
               Retry
             </button>
           </div>
@@ -408,7 +408,7 @@ const ReceptionistManagement = () => {
                         disabled={deleteLoading}
                       >
                         {deleteLoading ? (
-                          <FiRotateCw className="animate-spin h-4 w-4" />
+                          <FiRefreshCw className="animate-spin h-4 w-4" />
                         ) : (
                           <FiTrash2 size={18} />
                         )}
@@ -486,7 +486,7 @@ const ReceptionistManagement = () => {
               )}
               {successMessage && (
                 <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-start gap-2">
-                  <CheckCircle className="flex-shrink-0 mt-0.5" />
+                  <FiCheckCircle className="flex-shrink-0 mt-0.5" />
                   <span>{successMessage}</span>
                 </div>
               )}
@@ -659,7 +659,7 @@ const ReceptionistManagement = () => {
                       disabled={submitLoading}
                     >
                       {submitLoading && (
-                        <FiRotateCw className="animate-spin h-4 w-4" />
+                        <FiRefreshCw className="animate-spin h-4 w-4" />
                       )}
                       {currentReceptionist ? 'Update' : 'Create'} Receptionist
                     </button>

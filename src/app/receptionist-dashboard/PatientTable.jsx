@@ -1,6 +1,5 @@
+'use client';
 // app/components/Dashboard/PatientTable.jsx
-'use client'
-
 import { useState, useEffect } from 'react'
 import { EyeIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
 

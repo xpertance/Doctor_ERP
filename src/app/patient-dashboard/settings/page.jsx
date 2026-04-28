@@ -1,5 +1,5 @@
-"use client"
-
+'use client';
+import { API_BASE_URL } from '@/utils/api';
 import { 
   FiUser, FiMail, FiPhone, FiLock, FiCalendar, 
   FiMapPin, FiHome, FiDroplet, FiClipboard, 
@@ -43,7 +43,7 @@ console.log("asdf",userId)
     if (!userId) return;
     
     try {
-      const res = await fetch(`https://practo-backend.vercel.app/api/patients/fetch-by-id/${userId}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/patient/fetch-by-id/${userId}`);
       const data = await res.json();
       console.log("API Response:", data);
       
@@ -96,7 +96,7 @@ console.log("asdf",userId)
           : null
       };
 
-      const res = await fetch(`https://practo-backend.vercel.app/api/patients/update/${userId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/patient/update/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -1,6 +1,5 @@
+'use client';
 // app/components/Dashboard/QuickActionCards.jsx
-'use client'
-
 import Link from 'next/link'
 import { 
   UserPlusIcon, 
@@ -25,7 +24,7 @@ export default function QuickActionCards({ stats = {} }) {
       value: safeStats.totalPatients,
       label: 'Total Patients',
       icon: UserPlusIcon,
-      href: '/patients/add',
+      href: '/receptionist-dashboard/patients/add',
       color: 'bg-blue-500',
       bgColor: 'bg-blue-50',
       textColor: 'text-blue-700'
@@ -35,7 +34,7 @@ export default function QuickActionCards({ stats = {} }) {
       value: safeStats.todayAppointments,
       label: 'Scheduled Today',
       icon: CalendarDaysIcon,
-      href: '/appointments',
+      href: '/receptionist-dashboard/appointments',
       color: 'bg-green-500',
       bgColor: 'bg-green-50',
       textColor: 'text-green-700'
@@ -45,7 +44,7 @@ export default function QuickActionCards({ stats = {} }) {
       value: safeStats.newMessages,
       label: 'Unread Messages',
       icon: ChatBubbleLeftIcon,
-      href: '/messages',
+      href: '/receptionist-dashboard/messages',
       color: 'bg-purple-500',
       bgColor: 'bg-purple-50',
       textColor: 'text-purple-700'
@@ -55,7 +54,7 @@ export default function QuickActionCards({ stats = {} }) {
       value: safeStats.followUps,
       label: 'This Week',
       icon: ClockIcon,
-      href: '/appointments',
+      href: '/receptionist-dashboard/appointments',
       color: 'bg-orange-500',
       bgColor: 'bg-orange-50',
       textColor: 'text-orange-700'

@@ -1,5 +1,5 @@
 'use client';
-
+import { API_BASE_URL } from '@/utils/api';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   Search, Eye, Edit, Trash2, X, User, Mail, Phone, Calendar, VenetianMask, 
@@ -123,12 +123,21 @@ const [clinicId,setId]=useState();
   }, []);
   useEffect(()=>{
     const fetchPatients=async()=>{
-      const res= await fetch(`https://practo-backend.vercel.app/api/clinic/fetch-patients/${clinicId}`);
-      const data =await res.json();
-      console.log("sdf",data);
-      setPatients(data.data)
+      try {
+        const res= await fetch(`${API_BASE_URL}/api/v1/clinic/fetch-patients/${clinicId}`);
+        const responseData = await res.json();
+        console.log("sdf", responseData);
+        
+        if (responseData.success) {
+          setPatients(responseData.data.patients || []);
+        } else {
+          console.error('Failed to fetch patients:', responseData.message);
+        }
+      } catch (err) {
+        console.error('Error fetching patients:', err);
+      }
     }
-    fetchPatients();
+    if (clinicId) fetchPatients();
   },[clinicId])
 
   console.log(clinicId);
