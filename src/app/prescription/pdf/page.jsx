@@ -1,12 +1,12 @@
 'use client';
 // Next.js structural refresh mapping logic
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { API_BASE_URL } from '@/utils/api';
 import { generatePrescriptionHtml } from '@/utils/prescriptionHtmlGenerator';
 
-export default function PrescriptionPdfPage() {
+function PrescriptionPdfContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const [htmlContent, setHtmlContent] = useState('');
@@ -97,5 +97,17 @@ export default function PrescriptionPdfPage() {
 
   return (
     <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+  );
+}
+
+export default function PrescriptionPdfPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
+        <p className="text-sm font-medium text-slate-500 animate-pulse">Generating Prescription View...</p>
+      </div>
+    }>
+      <PrescriptionPdfContent />
+    </Suspense>
   );
 }

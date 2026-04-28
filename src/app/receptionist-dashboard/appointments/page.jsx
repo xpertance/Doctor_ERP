@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import {
   Calendar,
@@ -33,7 +33,7 @@ import { doctorService } from '@/utils/doctorService';
 import toast, { Toaster } from 'react-hot-toast';
 import { API_BASE_URL } from '@/utils/api';
 
-const AppointmentsDashboard = () => {
+const AppointmentsDashboardContent = () => {
   // State management
   const searchParams = useSearchParams();
   const initialDate = searchParams.get('date') || '';
@@ -1223,6 +1223,18 @@ const AppointmentsDashboard = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const AppointmentsDashboard = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
+        <p className="text-sm font-medium text-slate-500 animate-pulse">Loading Appointments...</p>
+      </div>
+    }>
+      <AppointmentsDashboardContent />
+    </Suspense>
   );
 };
 
