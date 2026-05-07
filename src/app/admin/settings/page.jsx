@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   User,
   Bell,
@@ -48,16 +48,35 @@ export default function SettingsPage() {
   })
   
   const [profileData, setProfileData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@hospital.com',
-    phone: '+1 (555) 123-4567',
-    position: 'Administrator',
-    department: 'IT',
-    location: 'New York, NY',
-    bio: 'Experienced healthcare administrator with 10+ years in hospital management systems.',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    position: "Administrator",
+    department: "IT",
+    location: "",
+    bio: "",
     avatar: null
-  })
+  });
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const nameParts = (user.name || "").split(" ");
+        setProfileData(prev => ({
+          ...prev,
+          firstName: nameParts[0] || "",
+          lastName: nameParts.slice(1).join(" ") || "",
+          email: user.email || "",
+          phone: user.phone || ""
+        }));
+      } catch (e) {
+        console.error("Error parsing user data", e);
+      }
+    }
+  }, []);
 
   const [securitySettings, setSecuritySettings] = useState({
     currentPassword: '',
@@ -284,3 +303,4 @@ export default function SettingsPage() {
     </div>
   )
 }
+

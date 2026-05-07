@@ -60,8 +60,7 @@ useEffect(()=>{
   const user=localStorage.getItem('user')
   const userdata=JSON.parse(user);
   const id=userdata?.id
- fetchUserData(id);
-})
+ fetchUserData(id); }, [])
   const clinicTypes = [
     { value: 'general', label: 'General Practice', icon: '🏥' },
     { value: 'specialty', label: 'Specialty Clinic', icon: '⚕️' },
@@ -745,3 +744,4 @@ useEffect(()=>{
     </div>
   );
 }
+

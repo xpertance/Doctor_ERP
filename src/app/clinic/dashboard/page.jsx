@@ -1,4 +1,7 @@
 'use client';
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import { API_BASE_URL } from '@/utils/api'
 import {
   Stethoscope,
   Users,
@@ -8,41 +11,77 @@ import {
 } from 'lucide-react'
 
 export default function ClinicDashboard() {
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  
+  const [dashboardData, setDashboardData] = useState({
+    stats: {
+      totalDoctors: 0,
+      totalReceptionists: 0,
+      appointmentsToday: 0,
+      pendingAppointments: 0
+    },
+    appointments: []
+  })
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true)
+        
+        // Get user/clinic data from local storage
+        const userStr = localStorage.getItem('user')
+        if (!userStr) return;
+        
+        const user = JSON.parse(userStr)
+        const clinicId = user.clinicId || user.id || user._id // fallback to user id if clinic user
+        
+        if (!clinicId) {
+          console.warn('No clinic ID found in user data')
+          setLoading(false)
+          return
+        }
+
+        const res = await axios.get(`${API_BASE_URL}/api/v1/clinic/dashboard/${clinicId}`)
+        if (res.data.success) {
+          setDashboardData(res.data.data)
+        }
+      } catch (err) {
+        console.error('Error fetching clinic dashboard data:', err)
+        setError('Failed to load dashboard metrics')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDashboardData()
+  }, [])
+
   const stats = [
     {
       name: 'Total Doctors',
-      value: '18',
+      value: loading ? '...' : dashboardData.stats.totalDoctors.toString(),
       icon: Stethoscope,
       iconColor: 'from-blue-500 to-blue-600',
-      change: '+2 this month',
     },
     {
       name: 'Receptionists',
-      value: '6',
+      value: loading ? '...' : dashboardData.stats.totalReceptionists.toString(),
       icon: Users,
       iconColor: 'from-green-500 to-green-600',
-      change: '+1 new hire',
     },
     {
       name: 'Appointments Today',
-      value: '47',
+      value: loading ? '...' : dashboardData.stats.appointmentsToday.toString(),
       icon: Calendar,
       iconColor: 'from-purple-500 to-purple-600',
-      change: '12 upcoming',
     },
     {
       name: 'Pending Tasks',
-      value: '9',
+      value: loading ? '...' : dashboardData.stats.pendingAppointments.toString(),
       icon: ClipboardList,
       iconColor: 'from-orange-500 to-orange-600',
-      change: '3 urgent',
     }
-  ]
-
-  const appointments = [
-    { id: 1, name: 'Dr. Smith', time: '10:00 AM', type: 'Checkup' },
-    { id: 2, name: 'Dr. Johnson', time: '11:30 AM', type: 'Follow-up' },
-    { id: 3, name: 'Dr. Lee', time: '2:15 PM', type: 'Consultation' }
   ]
 
   return (
@@ -53,10 +92,6 @@ export default function ClinicDashboard() {
           <h1 className="text-3xl font-bold text-gray-900">Clinic Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">Overview of clinic performance</p>
         </div>
-        <button className="relative p-2 bg-white rounded-full border hover:bg-gray-50">
-          <Bell className="w-5 h-5 text-gray-600" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-        </button>
       </div>
 
       {/* Stats Section */}
@@ -72,7 +107,6 @@ export default function ClinicDashboard() {
                 <div>
                   <p className="text-sm text-gray-500">{stat.name}</p>
                   <h2 className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</h2>
-                  <p className="text-sm text-gray-500 mt-1">{stat.change}</p>
                 </div>
                 <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.iconColor}`}>
                   <Icon className="w-5 h-5 text-white" />
@@ -92,20 +126,33 @@ export default function ClinicDashboard() {
             <a href="/clinic/appointments" className="text-sm text-blue-600 hover:underline">View All</a>
           </div>
           <div className="space-y-4">
-            {appointments.map((appt) => (
-              <div key={appt.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
-                    <Stethoscope className="w-5 h-5 text-white" />
+            {loading ? (
+              <p className="text-gray-500 text-sm">Loading appointments...</p>
+            ) : dashboardData.appointments.length > 0 ? (
+              dashboardData.appointments.map((appt) => (
+                <div key={appt.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
+                      <Stethoscope className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">{appt.patientName} (with {appt.doctorName})</p>
+                      <p className="text-sm text-gray-500">{appt.time} • {appt.type}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-800">{appt.name}</p>
-                    <p className="text-sm text-gray-500">{appt.time} • {appt.type}</p>
-                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    appt.status === 'completed' ? 'bg-green-100 text-green-700' :
+                    appt.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
+                    appt.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                    'bg-amber-100 text-amber-700'
+                  }`}>
+                    {appt.status.replace('_', ' ').toUpperCase()}
+                  </span>
                 </div>
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Confirmed</span>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm">No appointments scheduled for today.</p>
+            )}
           </div>
         </div>
 

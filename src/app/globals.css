@@ -1,4 +1,21 @@
 @import "tailwindcss";
+
+/* 
+  Global UI Scaling
+  Scales down the entire UI to ~85% (13.6px base) on larger screens.
+  Since Tailwind uses 'rem' units, this scales everything proportionally.
+*/
+html {
+  font-size: 85%; /* Adjust this to 80% if you want it even smaller */
+}
+
+/* Maintain default scaling on mobile devices for better readability */
+@media (max-width: 768px) {
+  html {
+    font-size: 100%;
+  }
+}
+
 /* 
 :root {
   --background: #ffffff;
@@ -24,33 +41,31 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 } */
-// Add this at the top of your component file
-const scrollbarStyles = `
-  /* Custom scrollbar for WebKit browsers (Chrome, Safari, Edge) */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  
-  ::-webkit-scrollbar-track {
-    background: rgba(99, 102, 241, 0.1);
-    border-radius: 10px;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background: rgba(99, 102, 241, 0.5);
-    border-radius: 10px;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(99, 102, 241, 0.7);
-  }
-  
-  /* Custom scrollbar for Firefox */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(99, 102, 241, 0.5) rgba(99, 102, 241, 0.1);
-  };
+/* Custom scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.5);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.7);
+}
+
+/* Custom scrollbar for Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.5) rgba(99, 102, 241, 0.1);
+}
   @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

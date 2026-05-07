@@ -1,5 +1,7 @@
 'use client';
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { API_BASE_URL } from '@/utils/api'
+import axios from 'axios'
 import { 
   TrendingUp, 
   TrendingDown,
@@ -23,80 +25,94 @@ import {
 export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState('7d')
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  
+  const [statsData, setStatsData] = useState({
+    totalPatients: 0,
+    totalDoctors: 0,
+    totalAppointments: 0,
+    totalRevenue: 0
+  })
+  
+  const [chartData, setChartData] = useState({
+    patientFlow: [],
+    departmentStats: []
+  })
+  
+  const [recentActivities, setRecentActivities] = useState([])
+  const [topDoctors, setTopDoctors] = useState([])
+
+  const fetchAnalytics = async () => {
+    try {
+      setIsRefreshing(true)
+      const res = await axios.get(`${API_BASE_URL}/api/v1/admin/analytics`)
+      if (res.data.success) {
+        const { stats, patientFlow, departmentStats, topDoctors, recentActivities } = res.data.data
+        setStatsData(stats)
+        setChartData({ patientFlow, departmentStats })
+        setTopDoctors(topDoctors)
+        setRecentActivities(recentActivities)
+      }
+    } catch (err) {
+      console.error('Error fetching analytics:', err)
+      setError('Failed to load analytics data')
+    } finally {
+      setIsRefreshing(false)
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchAnalytics()
+  }, [])
 
   const handleRefresh = async () => {
-    setIsRefreshing(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsRefreshing(false)
+    await fetchAnalytics()
   }
 
   const statsCards = [
     {
       title: 'Total Patients',
-      value: '2,847',
-      change: '+12.5%',
+      value: statsData.totalPatients.toLocaleString(),
+      change: '+0%',
       trend: 'up',
       icon: Users,
       color: 'bg-blue-500'
     },
     {
       title: 'Total Doctors',
-      value: '156',
-      change: '+3.2%',
+      value: statsData.totalDoctors.toLocaleString(),
+      change: '+0%',
       trend: 'up',
       icon: Stethoscope,
       color: 'bg-green-500'
     },
     {
       title: 'Appointments',
-      value: '1,249',
-      change: '+8.1%',
+      value: statsData.totalAppointments.toLocaleString(),
+      change: '+0%',
       trend: 'up',
       icon: Calendar,
       color: 'bg-purple-500'
     },
     {
       title: 'Revenue',
-      value: '₹124,580',
-      change: '-2.4%',
-      trend: 'down',
+      value: `₹${statsData.totalRevenue.toLocaleString()}`,
+      change: '+0%',
+      trend: 'up',
       icon: IndianRupee,
       color: 'bg-orange-500'
     }
   ]
 
-  const chartData = {
-    patientFlow: [
-      { month: 'Jan', patients: 120, appointments: 89 },
-      { month: 'Feb', patients: 132, appointments: 98 },
-      { month: 'Mar', patients: 101, appointments: 76 },
-      { month: 'Apr', patients: 134, appointments: 102 },
-      { month: 'May', patients: 152, appointments: 118 },
-      { month: 'Jun', patients: 169, appointments: 132 }
-    ],
-    departmentStats: [
-      { name: 'Cardiology', value: 35, color: '#8B5CF6' },
-      { name: 'Neurology', value: 25, color: '#06B6D4' },
-      { name: 'Pediatrics', value: 20, color: '#10B981' },
-      { name: 'Orthopedics', value: 15, color: '#F59E0B' },
-      { name: 'Others', value: 5, color: '#EF4444' }
-    ]
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    )
   }
-
-  const recentActivities = [
-    { id: 1, type: 'appointment', message: 'New appointment scheduled with Dr. Sarah Johnson', time: '2 minutes ago', icon: Calendar },
-    { id: 2, type: 'patient', message: 'New patient registration: John Doe', time: '15 minutes ago', icon: UserPlus },
-    { id: 3, type: 'revenue', message: 'Payment received: ₹350 from consultation', time: '1 hour ago', icon: IndianRupee },
-    { id: 4, type: 'doctor', message: 'Dr. Michael Chen updated availability', time: '2 hours ago', icon: Clock },
-    { id: 5, type: 'appointment', message: 'Appointment completed: Jane Smith', time: '3 hours ago', icon: Activity }
-  ]
-
-  const topDoctors = [
-    { id: 1, name: 'Dr. Sarah Johnson', specialty: 'Cardiology', appointments: 45, rating: 4.9 },
-    { id: 2, name: 'Dr. Michael Chen', specialty: 'Neurology', appointments: 38, rating: 4.8 },
-    { id: 3, name: 'Dr. Emily Rodriguez', specialty: 'Pediatrics', appointments: 32, rating: 4.7 },
-    { id: 4, name: 'Dr. David Kim', specialty: 'Orthopedics', appointments: 29, rating: 4.6 }
-  ]
 
   return (
     <div className="space-y-6">
@@ -139,17 +155,6 @@ export default function AnalyticsPage() {
               <div>
                 <p className="text-sm font-medium text-gray-600">{stat.title}</p>
                 <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                <div className="flex items-center mt-2">
-                  {stat.trend === 'up' ? (
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
-                  )}
-                  <span className={`text-sm font-medium ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                    {stat.change}
-                  </span>
-                  <span className="text-gray-500 text-sm ml-1">vs last period</span>
-                </div>
               </div>
               <div className={`p-3 rounded-xl ${stat.color}`}>
                 <stat.icon className="h-6 w-6 text-white" />
@@ -168,20 +173,20 @@ export default function AnalyticsPage() {
             <BarChart3 className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-4">
-            {chartData.patientFlow.map((item, index) => (
+            {chartData.patientFlow.length > 0 ? chartData.patientFlow.map((item, index) => (
               <div key={index} className="flex items-center space-x-4">
                 <div className="w-12 text-sm font-medium text-gray-600">{item.month}</div>
                 <div className="flex-1 flex items-center space-x-2">
                   <div className="flex-1 bg-gray-100 rounded-full h-2">
                     <div 
                       className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full"
-                      style={{ width: `${(item.patients / 200) * 100}%` }}
+                      style={{ width: `${Math.min((item.patients / Math.max(...chartData.patientFlow.map(d => d.patients), 1)) * 100, 100)}%` }}
                     ></div>
                   </div>
                   <span className="text-sm font-medium text-gray-900 w-8">{item.patients}</span>
                 </div>
               </div>
-            ))}
+            )) : <p className="text-gray-500 text-sm">No patient data available yet.</p>}
           </div>
         </div>
 
@@ -192,7 +197,7 @@ export default function AnalyticsPage() {
             <PieChart className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-3">
-            {chartData.departmentStats.map((dept, index) => (
+            {chartData.departmentStats.length > 0 ? chartData.departmentStats.map((dept, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div 
@@ -203,7 +208,7 @@ export default function AnalyticsPage() {
                 </div>
                 <span className="text-sm font-semibold text-gray-900">{dept.value}%</span>
               </div>
-            ))}
+            )) : <p className="text-gray-500 text-sm">No department data available yet.</p>}
           </div>
         </div>
       </div>
@@ -217,17 +222,17 @@ export default function AnalyticsPage() {
             <Activity className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-4">
-            {recentActivities.map((activity) => (
+            {recentActivities.length > 0 ? recentActivities.map((activity) => (
               <div key={activity.id} className="flex items-start space-x-3">
                 <div className="p-2 bg-indigo-100 rounded-lg">
-                  <activity.icon className="h-4 w-4 text-indigo-600" />
+                  <Calendar className="h-4 w-4 text-indigo-600" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">{activity.message}</p>
                   <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
                 </div>
               </div>
-            ))}
+            )) : <p className="text-gray-500 text-sm">No recent activities available yet.</p>}
           </div>
         </div>
 
@@ -238,7 +243,7 @@ export default function AnalyticsPage() {
             <Users className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-4">
-            {topDoctors.map((doctor, index) => (
+            {topDoctors.length > 0 ? topDoctors.map((doctor, index) => (
               <div key={doctor.id} className="flex items-center justify-between p-3 bg-gray-50/50 rounded-xl">
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full text-sm font-semibold">
@@ -250,39 +255,15 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-gray-900">{doctor.appointments}</p>
-                  <div className="flex items-center text-xs text-gray-500">
+                  <p className="text-sm font-semibold text-gray-900">{doctor.appointments} Appts</p>
+                  <div className="flex items-center justify-end text-xs text-gray-500">
                     <Heart className="h-3 w-3 text-red-500 mr-1" />
                     {doctor.rating}
                   </div>
                 </div>
               </div>
-            ))}
+            )) : <p className="text-gray-500 text-sm">No doctors data available yet.</p>}
           </div>
-        </div>
-      </div>
-
-      {/* Quick Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-sm text-center">
-          <Building2 className="h-8 w-8 mx-auto text-blue-500 mb-2" />
-          <p className="text-2xl font-bold text-gray-900">8</p>
-          <p className="text-xs text-gray-600">Departments</p>
-        </div>
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-sm text-center">
-          <Clock className="h-8 w-8 mx-auto text-green-500 mb-2" />
-          <p className="text-2xl font-bold text-gray-900">24/7</p>
-          <p className="text-xs text-gray-600">Available</p>
-        </div>
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-sm text-center">
-          <Eye className="h-8 w-8 mx-auto text-purple-500 mb-2" />
-          <p className="text-2xl font-bold text-gray-900">95%</p>
-          <p className="text-xs text-gray-600">Satisfaction</p>
-        </div>
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-sm text-center">
-          <Activity className="h-8 w-8 mx-auto text-orange-500 mb-2" />
-          <p className="text-2xl font-bold text-gray-900">99.9%</p>
-          <p className="text-xs text-gray-600">Uptime</p>
         </div>
       </div>
     </div>
