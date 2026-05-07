@@ -15,7 +15,8 @@ import {
   LogOut,
   ChevronRight,
   Sparkles,
-  FileText
+  FileText,
+  Settings as SettingsIcon
 } from 'lucide-react'
 
 export default function DashboardLayout({ children }) {
@@ -137,30 +138,20 @@ export default function DashboardLayout({ children }) {
           </nav>
 
           <div className="p-4 border-t border-blue-50">
-            <div className="relative group">
-              <div className="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-all duration-300 cursor-pointer border border-blue-100">
-                <div className="relative">
-                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
-                    <span className="text-white font-bold text-sm">
-                      {userdata?.name?.charAt(0) || 'A'}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{userdata?.name}</p>
-                  <p className="text-xs text-blue-600 truncate">{userdata?.email}</p>
-                </div>
-              </div>
-              
-              <button onClick={() => {
+            <button 
+              onClick={() => {
                 localStorage.removeItem('token'); 
                 localStorage.removeItem('user');
                 router.push('/login');
-              }} className="mt-3 w-full flex items-center justify-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all duration-200 group border border-gray-200 hover:border-red-200">
-                <LogOut className="mr-3 h-4 w-4 group-hover:scale-110 transition-transform" />
-                <span>Sign out</span>
-              </button>
-            </div>
+              }}
+              className="flex w-full items-center px-4 py-4 text-sm font-semibold text-red-600 rounded-2xl
+                         transition-all duration-200 ease-out hover:bg-red-50 hover:scale-[1.02] transform"
+            >
+              <div className="p-2.5 rounded-xl mr-4 bg-red-100 group-hover:bg-red-200">
+                <LogOut className="h-5 w-5 text-red-600" />
+              </div>
+              <span className="flex-1">Logout</span>
+            </button>
           </div>
         </div>
       </div>
@@ -201,6 +192,30 @@ export default function DashboardLayout({ children }) {
                   <span className="text-white font-bold text-sm">
                     {userdata?.name?.charAt(0) || 'A'}
                   </span>
+                </div>
+                
+                {/* Profile Dropdown */}
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-100 z-50 transform origin-top-right group-hover:translate-y-0 translate-y-2">
+                  <div className="px-4 py-3 border-b border-gray-50 mb-1">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{userdata?.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{userdata?.email}</p>
+                  </div>
+                  <a href="/admin/settings" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                    <SettingsIcon className="h-4 w-4 mr-3 text-gray-400 group-hover:text-blue-500" />
+                    Settings
+                  </a>
+                  <div className="border-t border-gray-50 my-1"></div>
+                  <button 
+                    onClick={() => {
+                      localStorage.removeItem('token'); 
+                      localStorage.removeItem('user');
+                      router.push('/login');
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center group/logout"
+                  >
+                    <LogOut className="h-4 w-4 mr-3 group-hover/logout:scale-110 transition-transform" />
+                    Sign out
+                  </button>
                 </div>
               </div>
             </div>

@@ -1,6 +1,5 @@
 'use client';
 import { motion } from 'framer-motion';
-
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -21,7 +20,6 @@ import {
   Stethoscope,
   User
 } from 'lucide-react';
-import clsx from 'clsx';
 
 export default function ClinicLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -46,24 +44,17 @@ export default function ClinicLayout({ children }) {
       if (user.role !== ROLES.CLINIC) {
         router.push('/login');
       }
-      // if(user.status=="pending"){
-      //   router.push(`/pending-request/${user.id}`);
-        
-      // }else if(user.status=="rejected"){
-      //   router.push(`/rejected/${user.id}`);
-
-      // }
     } catch (error) {
       console.error('Invalid user data in localStorage');
       router.push('/login');
     }
   }, []);
-console.log("asdf",clinicData)
+
   const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/clinic', id: 'dashboard' },
     { icon: Users, label: 'Doctors', href: '/clinic/doctors', id: 'doctors' },
     { icon: UserPlus, label: 'Receptionists', href: '/clinic/receptionists', id: 'receptionists' },
-     { icon: User, label: 'Patients', href: '/clinic/patients', id: 'patients' },
+    { icon: User, label: 'Patients', href: '/clinic/patients', id: 'patients' },
     { icon: ImageIcon, label: 'Manage Images', href: '/clinic/images', id: 'images' },
     { icon: Settings, label: 'Settings', href: '/clinic/settings', id: 'settings' }
   ];
@@ -78,115 +69,88 @@ console.log("asdf",clinicData)
         />
       )}
 
-      
-{/* Animated Desktop Sidebar */}
-<motion.div
-  initial={{ x: -100 }}
-  animate={{ x: 0 }}
-  transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-  className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64 lg:bg-white lg:shadow-xl lg:block"
->
-  <div className="flex h-16 items-center justify-around px-6 border-b border-gray-200/50">
-    <div className="w-10 h-10 bg-white shadow-xl rounded-lg flex items-center justify-center">
-      <Building2 className="w-5 h-5 text-blue-600" />
-    </div>
-    <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-      HealthByte
-    </h1>
-  </div>
-  <nav className="mt-8 px-4">
-    {sidebarItems.map((item) => {
-      const Icon = item.icon;
-      const isActive = pathname === item.href;
-      return (
-        <Link
-          key={item.label}
-          href={item.href}
-          className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
-            isActive
-              ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
-              : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
-          }`}
+      {/* Animated Desktop Sidebar */}
+      <motion.div
+        initial={{ x: -100 }}
+        animate={{ x: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+        className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64 lg:bg-white lg:shadow-xl lg:block"
+      >
+        <div className="flex h-16 items-center justify-around px-6 border-b border-gray-200/50">
+          <div className="w-10 h-10 bg-white shadow-xl rounded-lg flex items-center justify-center">
+            <Building2 className="w-5 h-5 text-blue-600" />
+          </div>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            HealthByte
+          </h1>
+        </div>
+        <nav className="mt-8 px-4">
+          {sidebarItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
+                  isActive
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
+                    : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                }`}
+              >
+                <Icon className="w-5 h-5 mr-3" />
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </motion.div>
+
+      {/* Mobile Sidebar */}
+      {sidebarOpen && (
+        <motion.div
+          initial={{ x: '-100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '-100%' }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl p-4 lg:hidden"
         >
-          <Icon className="w-5 h-5 mr-3" />
-          <span className="font-medium">{item.label}</span>
-        </Link>
-      );
-    })}
-  </nav>
-
-  <div className="absolute bottom-6 left-4 right-4">
-    <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-4 text-white">
-      <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-          {clinicData?.logo ? (
-            <img src={clinicData.logo} alt="Clinic" className="rounded-full w-full h-full object-cover" />
-          ) : (
-            <Building2 className="w-5 h-5" />
-          )}
-        </div>
-        <div>
-          <p className="font-semibold">{clinicData?.name || 'Clinic Name'}</p>
-          <p className="text-sm opacity-90">{clinicData?.email || 'clinic@example.com'}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</motion.div>
-
-
-{/* Mobile Sidebar */}
-{sidebarOpen && (
-  <>
-    <div
-      className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-      onClick={() => setSidebarOpen(false)}
-    />
-    <motion.div
-      initial={{ x: '-100%' }}
-      animate={{ x: 0 }}
-      exit={{ x: '-100%' }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl p-4 lg:hidden"
-    >
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <Building2 className="w-6 h-6 text-blue-600" />
-          <h1 className="text-xl font-bold text-blue-600">HealthByte</h1>
-        </div>
-        <button
-          onClick={() => setSidebarOpen(false)}
-          className="p-2 rounded-md hover:bg-gray-100"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
-      <nav>
-        {sidebarItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
-                isActive
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
-                  : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
-              }`}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <Building2 className="w-6 h-6 text-blue-600" />
+              <h1 className="text-xl font-bold text-blue-600">HealthByte</h1>
+            </div>
+            <button
               onClick={() => setSidebarOpen(false)}
+              className="p-2 rounded-md hover:bg-gray-100"
             >
-              <Icon className="w-5 h-5 mr-3" />
-              <span className="font-medium">{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-    </motion.div>
-  </>
-)}
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
+          <nav>
+            {sidebarItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
+                    isActive
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
+                      : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                  }`}
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Icon className="w-5 h-5 mr-3" />
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </motion.div>
+      )}
 
       {/* Main content */}
       <div className="lg:ml-64">

@@ -28,7 +28,7 @@ export default function Dashboard() {
           
           // Get the 4 most recently added clinics (sorted by creation date)
           const sortedClinics = [...clinics]
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .sort((a, b) => { if (!a.createdAt) return 1; if (!b.createdAt) return -1; return new Date(b.createdAt) - new Date(a.createdAt); })
             .slice(0, 4)
           
           setRecentClinics(sortedClinics)
@@ -47,16 +47,14 @@ export default function Dashboard() {
     {
       name: 'Total Doctors',
       value: loading ? '...' : doctorsCount.toString(),
-      change: '+12%',
-      changeType: 'increase',
+      
       icon: Users,
       color: 'from-blue-500 to-blue-600'
     },
     {
       name: 'Total Clinics',
       value: loading ? '...' : clinicsCount.toString(),
-      change: '+23%',
-      changeType: 'increase',
+      
       icon: UserPlus,
       color: 'from-green-500 to-green-600'
     },
@@ -89,10 +87,7 @@ export default function Dashboard() {
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-gray-600">{stat.name}</p>
                   <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium text-green-600">{stat.change}</span>
-                    <span className="text-sm text-gray-500 ml-1">from last month</span>
-                  </div>
+                  
                 </div>
                 <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.color}`}>
                   <Icon className="h-6 w-6 text-white" />
@@ -162,3 +157,5 @@ export default function Dashboard() {
     </div>
   )
 }
+
+
