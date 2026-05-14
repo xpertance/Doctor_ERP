@@ -236,8 +236,16 @@ export default function Billing() {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden">
-      <div className="p-6">
+    <div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Billing & Invoices</h1>
+          <p className="text-gray-600 mt-1">Manage patient invoices, payments, and financial records</p>
+        </div>
+      </div>
+      <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden">
+        <div className="p-6">
         <div className="mb-6 relative max-w-md">
           <input
             type="text"
@@ -337,6 +345,7 @@ export default function Billing() {
       <div style={{ display: 'none' }}>
         <InvoiceContent invoice={selectedInvoice} isPrint={true} refProp={printRef} />
       </div>
+    </div>
     </div>
   );
 }

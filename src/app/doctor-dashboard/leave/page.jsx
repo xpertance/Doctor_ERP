@@ -130,16 +130,13 @@ const ManageLeavePage = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-8">
       <Toaster position="top-right" />
       
-      <div className="hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <CalendarIcon className="text-blue-600" />
-            Manage Leave
-          </h1>
-          <p className="text-gray-500 mt-1">Mark dates when you are unavailable for appointments</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Manage Leave</h1>
+          <p className="text-slate-500 mt-1 text-sm">Mark dates when you are unavailable for appointments</p>
         </div>
       </div>
 

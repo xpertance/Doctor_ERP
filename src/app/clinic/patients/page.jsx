@@ -193,27 +193,20 @@ export default function PatientsPage() {
   const sections = ["Personal Info", "Treatment", "Prescription", "Tablets List"];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-6">
-      <style jsx global>{`
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(59, 130, 246, 0.1); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.7); }
-        * { scrollbar-width: thin; scrollbar-color: rgba(59, 130, 246, 0.5) rgba(59, 130, 246, 0.1); }
-      `}</style>
+    <div className="min-h-screen bg-slate-50">
 
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex justify-between items-end">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-blue-800">Patients</h1>
-            <p className="text-gray-600">Manage all patient records and details</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Patients</h1>
+            <p className="text-slate-500 mt-1 text-sm">Manage all patient records and details</p>
           </div>
-          <div className="relative" ref={searchRef}>
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <div className="relative max-w-2xl" ref={searchRef}>
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
             <input
               type="text"
               placeholder="Search patients..."
-              className="pl-10 pr-4 py-2 w-64 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);

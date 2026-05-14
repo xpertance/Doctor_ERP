@@ -100,8 +100,22 @@ export default function AddPatientPage() {
   };
 
   return (
-    <div className="space-y-8 p-6 bg-blue-50 min-h-screen">
+    <div className="space-y-8 bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-6">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Add New Patient</h1>
+            <p className="text-slate-500 mt-1 text-sm">Register a new patient and book their first appointment</p>
+          </div>
+          <Link
+            href="/receptionist-dashboard/patients"
+            className="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors mt-4 sm:mt-0"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Back to Patients
+          </Link>
+        </div>
         {/* Error Message */}
         {error && (
           <div className="mt-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg p-4 animate-fade-in">
@@ -120,8 +134,8 @@ export default function AddPatientPage() {
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-6">
           {/* Personal Information */}
-          <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden transition-all duration-200 hover:shadow-md">
-            <div className="px-6 py-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-blue-100">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-200 hover:shadow-md">
+            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
               <div className="flex items-center">
                 <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
                   <User className="w-5 h-5" />
@@ -142,7 +156,7 @@ export default function AddPatientPage() {
                     value={formData.firstName}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                     placeholder="Enter first name"
                   />
                 </div>
@@ -157,7 +171,7 @@ export default function AddPatientPage() {
                     value={formData.lastName}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                     placeholder="Enter last name"
                   />
                 </div>
@@ -175,7 +189,7 @@ export default function AddPatientPage() {
                       required
                       min="0"
                       max="150"
-                      className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                       placeholder="Enter age"
                     />
                     <Calendar className="absolute right-3 top-3 h-5 w-5 text-blue-400 pointer-events-none" />
@@ -191,7 +205,7 @@ export default function AddPatientPage() {
                     value={formData.gender}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 appearance-none bg-blue-50/50"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 appearance-none bg-white"
                   >
                     <option value="">Select gender</option>
                     <option value="Male">Male</option>
@@ -211,7 +225,7 @@ export default function AddPatientPage() {
                       name="bloodGroup"
                       value={formData.bloodGroup}
                       onChange={handleChange}
-                      className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 appearance-none bg-blue-50/50"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 appearance-none bg-white"
                     >
                       <option value="">Select blood group</option>
                       <option value="A+">A+</option>
@@ -231,8 +245,8 @@ export default function AddPatientPage() {
           </div>
 
           {/* Contact Information */}
-          <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden transition-all duration-200 hover:shadow-md">
-            <div className="px-6 py-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-blue-100">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-200 hover:shadow-md">
+            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
               <div className="flex items-center">
                 <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
                   <Phone className="w-5 h-5" />
@@ -254,7 +268,7 @@ export default function AddPatientPage() {
                       value={formData.phoneNumber}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-2.5 pl-12 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                      className="w-full px-4 py-2.5 pl-12 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                       placeholder="(555) 123-4567"
                     />
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -274,7 +288,7 @@ export default function AddPatientPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-2.5 pl-12 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                      className="w-full px-4 py-2.5 pl-12 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                       placeholder="patient@example.com"
                     />
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -293,7 +307,7 @@ export default function AddPatientPage() {
                       name="address"
                       value={formData.address}
                       onChange={handleChange}
-                      className="w-full px-4 py-2.5 pl-12 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                      className="w-full px-4 py-2.5 pl-12 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                       placeholder="Street address"
                     />
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -311,7 +325,7 @@ export default function AddPatientPage() {
                     name="city"
                     value={formData.city}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                     placeholder="City"
                   />
                 </div>
@@ -325,7 +339,7 @@ export default function AddPatientPage() {
                     name="state"
                     value={formData.state}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                     placeholder="State"
                   />
                 </div>
@@ -339,7 +353,7 @@ export default function AddPatientPage() {
                     name="zipCode"
                     value={formData.zipCode}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                     placeholder="12345"
                   />
                 </div>
@@ -355,7 +369,7 @@ export default function AddPatientPage() {
                       value={formData.password}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-2.5 pl-12 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                      className="w-full px-4 py-2.5 pl-12 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                       placeholder="Create a password"
                     />
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -369,8 +383,8 @@ export default function AddPatientPage() {
           
 
           {/* Medical Information */}
-          <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden transition-all duration-200 hover:shadow-md">
-            <div className="px-6 py-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-blue-100">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-200 hover:shadow-md">
+            <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50">
               <div className="flex items-center">
                 <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
                   <FileText className="w-5 h-5" />
@@ -391,7 +405,7 @@ export default function AddPatientPage() {
                     onChange={handleChange}
                     required
                     rows={3}
-                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                     placeholder="Describe current symptoms and concerns"
                   />
                 </div>
@@ -405,7 +419,7 @@ export default function AddPatientPage() {
                     value={formData.medicalHistory}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                     placeholder="Previous medical conditions, surgeries, or significant health events"
                   />
                 </div>
@@ -419,7 +433,7 @@ export default function AddPatientPage() {
                     value={formData.allergies}
                     onChange={handleChange}
                     rows={2}
-                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                     placeholder="List any known allergies (medications, foods, environmental, etc.)"
                   />
                 </div>
@@ -433,7 +447,7 @@ export default function AddPatientPage() {
                     value={formData.currentMedications}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-blue-50/50"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
                     placeholder="List current medications with dosages and frequency"
                   />
                 </div>
@@ -441,8 +455,8 @@ export default function AddPatientPage() {
             </div>
           </div>
           {/* Book Appointment (Mandatory) */}
-          <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden transition-all duration-200 hover:shadow-md mb-6">
-            <div className="px-6 py-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-blue-100">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-200 hover:shadow-md mb-6">
+            <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50">
               <div className="flex items-center">
                 <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
                   <Calendar className="w-5 h-5" />
@@ -462,7 +476,7 @@ export default function AddPatientPage() {
                     value={formData.doctorId}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2.5 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50/50"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                   >
                     <option value="">Select a doctor</option>
                     {doctors.map(doc => (

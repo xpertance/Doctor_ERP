@@ -168,25 +168,33 @@ export default function DynamicDashboard() {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-4 py-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {patientData?.firstName || 'Patient'}!
-          </h1>
-          <p className="text-gray-600 mt-1">Here's your health dashboard overview</p>
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="flex flex-col gap-2 mb-2">
+        <div className="flex items-center text-sm text-slate-500 font-medium">
+          <span className="hover:text-blue-600 cursor-pointer transition-colors">Home</span>
+          <span className="mx-2">/</span>
+          <span className="text-slate-800">Dashboard</span>
         </div>
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={refreshDashboard}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <FiClock className="text-white" />
-            <span>Refresh</span>
-          </button>
-          <div className="flex items-center space-x-2 text-sm text-gray-500">
-            <FiClock className="text-gray-400" />
-            <span>Last updated: {formatLastUpdated()}</span>
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
+              Welcome back, {patientData?.firstName || 'Patient'}!
+            </h1>
+            <p className="text-slate-500 mt-1 text-sm">Here's your health dashboard overview.</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={refreshDashboard}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              <FiClock className="text-white w-4 h-4" />
+              <span>Refresh</span>
+            </button>
+            <div className="flex items-center space-x-2 text-sm text-slate-500 bg-white border border-slate-200 shadow-sm px-4 py-2 rounded-xl">
+              <FiClock className="h-4 w-4 text-blue-500" />
+              <span className="font-medium">Last updated: {formatLastUpdated()}</span>
+            </div>
           </div>
         </div>
       </div>

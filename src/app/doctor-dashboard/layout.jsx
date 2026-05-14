@@ -38,7 +38,7 @@ export default function ClinicDashboardLayout({ children }) {
   }, []);
 
   const sidebarItems = [
-    { icon: Activity, label: 'Overview', href: '/doctor-dashboard', id: 'overview' },
+    { icon: Activity, label: 'Dashboard', href: '/doctor-dashboard', id: 'overview' },
     { icon: Calendar, label: 'Appointments', href: '/doctor-dashboard/appointments', id: 'appointments' },
     { icon: Users, label: 'Patients', href: '/doctor-dashboard/patients', id: 'patients' },
     { icon: Calendar, label: 'Manage Leave', href: '/doctor-dashboard/leave', id: 'leave' },
@@ -47,10 +47,7 @@ export default function ClinicDashboardLayout({ children }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30 relative overflow-hidden">
-      {/* Decorative background blobs */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/20 rounded-full blur-[120px] -z-10 animate-pulse"></div>
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-100/20 rounded-full blur-[120px] -z-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
+    <div className="min-h-screen bg-[#f8fafc] relative overflow-hidden text-slate-800">
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
@@ -58,17 +55,16 @@ export default function ClinicDashboardLayout({ children }) {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 shadow-xl shadow-slate-200/20 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-100 flex flex-col transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="flex h-20 items-center px-8 border-b border-slate-200/60">
+        <div className="flex h-16 items-center px-6 border-b border-slate-100 flex-shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/20 rounded-xl flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Stethoscope className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent">HealthByte</h1>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Doctor Portal</p>
+              <h1 className="text-xl font-bold text-slate-800">HealthByte</h1>
             </div>
           </div>
         </div>
@@ -81,49 +77,59 @@ export default function ClinicDashboardLayout({ children }) {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
-                  isActive ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                className={`flex items-center px-3 py-2.5 mx-3 mb-1 rounded-xl transition-all duration-200 font-medium ${
+                  isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
-                <Icon className="w-5 h-5 mr-3" />
-                <span className="font-medium">{item.label}</span>
+                <Icon className={`w-5 h-5 mr-3 flex-shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+                <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
+
+
       </div>
 
       {/* Main content */}
       <div className="lg:ml-72 flex-1 flex flex-col min-h-screen">
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
-          <div className="flex items-center justify-between h-20 px-8">
-            <div className="flex items-center">
+        <header className="sticky top-0 z-30 bg-white border-b border-slate-100">
+          <div className="flex items-center justify-between h-16 px-8">
+            <div className="flex items-center flex-1">
               <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors mr-4">
                 <Menu className="w-5 h-5" />
               </button>
 
-              <h2 className="text-lg font-bold text-slate-800 hidden md:block">
-                {pathname === '/doctor-dashboard/patients' ? 'Patient Management' : pathname === '/doctor-dashboard/appointments' ? "Doctor's Appointments" : (sidebarItems.find(i => i.href === pathname)?.label || 'Dashboard')}
-              </h2>
+              {pathname === '/doctor-dashboard' && (
+                <div className="hidden lg:flex items-center max-w-2xl w-full ml-4 relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-4" />
+                  <input 
+                    type="text" 
+                    placeholder="Search analytics, records, or patients..." 
+                    className="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex items-center space-x-6">
+
+
               {/* Top-Right Profile Dropdown */}
               <div className="relative">
-                <button onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} className="flex items-center space-x-3 p-1.5 pl-3 rounded-xl hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200">
-                  <div className="hidden md:block text-right">
-                    <p className="text-sm font-bold text-slate-900 capitalize truncate">Dr. {doctor?.firstName || userData?.firstName || ''}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight capitalize truncate">{doctor?.hospital || 'Clinic Consultant'}</p>
+                <button onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} className="flex items-center space-x-3 hover:bg-slate-50 transition-all rounded-lg p-1">
+                  <div className="hidden md:flex flex-col items-end">
+                    <p className="text-sm font-semibold text-slate-800 capitalize truncate">Welcome, Dr. {doctor?.firstName || userData?.firstName || ''}</p>
+                    <p className="text-xs text-slate-500 capitalize truncate">{doctor?.hospital || 'Clinic Consultant'}</p>
                   </div>
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20 p-0.5 border-2 border-white overflow-hidden">
+                  <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white overflow-hidden font-bold text-sm">
                     {doctor?.profileImage ? (
-                      <img src={doctor.profileImage} alt="Profile" className="h-full w-full object-cover rounded-lg" />
+                      <img src={doctor.profileImage} alt="Profile" className="h-full w-full object-cover" />
                     ) : (
-                      <User className="w-5 h-5 text-white" />
+                      <span className="font-bold text-sm">{(doctor?.firstName || userData?.firstName || 'D').charAt(0).toUpperCase()}</span>
                     )}
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {profileDropdownOpen && (
@@ -150,7 +156,7 @@ export default function ClinicDashboardLayout({ children }) {
           </div>
         </header>
 
-        <main className="p-8 flex-1">{children}</main>
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-6 lg:p-8 relative z-10">{children}</main>
       </div>
     </div>
   );

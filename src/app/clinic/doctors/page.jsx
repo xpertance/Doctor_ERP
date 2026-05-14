@@ -161,11 +161,11 @@ export default function DoctorsPage() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="max-w-7xl mx-auto">
+      <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Doctor Management</h1>
-          <p className="text-gray-500 mt-1">Manage medical professionals</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Doctor Management</h1>
+          <p className="text-slate-500 mt-1 text-sm">Manage medical professionals</p>
         </div>
         <Link href="/clinic/doctors/add">
           <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg shadow-sm">
@@ -176,14 +176,14 @@ export default function DoctorsPage() {
       </div>
 
       <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <div className="relative max-w-2xl">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
           <input
             type="text"
             placeholder="Search doctors..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm"
           />
         </div>
       </div>

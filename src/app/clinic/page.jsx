@@ -85,12 +85,19 @@ export default function ClinicDashboard() {
   ]
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Clinic Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">Overview of clinic performance</p>
+    <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="flex flex-col gap-2 mb-2">
+
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Clinic Dashboard</h1>
+            <p className="text-slate-500 mt-1 text-sm">Welcome back! Here's what's happening today.</p>
+          </div>
+          <div className="flex items-center space-x-2 text-sm text-slate-500 bg-white border border-slate-200 shadow-sm px-4 py-2 rounded-xl">
+            <Calendar className="h-4 w-4 text-blue-500" />
+            <span className="font-medium">Last updated: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          </div>
         </div>
       </div>
 
@@ -101,7 +108,7 @@ export default function ClinicDashboard() {
           return (
             <div
               key={stat.name}
-              className="bg-white/60 backdrop-blur-sm border border-white/30 shadow-sm rounded-2xl p-6"
+              className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -120,7 +127,7 @@ export default function ClinicDashboard() {
       {/* Bottom Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Appointments List */}
-        <div className="bg-white/60 backdrop-blur-sm border border-white/30 shadow-sm rounded-2xl p-6">
+        <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Today's Appointments</h2>
             <a href="/clinic/appointments" className="text-sm text-blue-600 hover:underline">View All</a>
@@ -157,7 +164,7 @@ export default function ClinicDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white/60 backdrop-blur-sm border border-white/30 shadow-sm rounded-2xl p-6">
+        <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div className="space-y-3">
             <a href="/clinic/doctors" className="flex items-center p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:scale-[1.02] transition-transform">

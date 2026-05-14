@@ -260,12 +260,12 @@ const ReceptionistManagement = () => {
   }, [error, successMessage]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div className="max-w-7xl mx-auto">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Receptionist Management</h1>
-          <p className="text-gray-600 mt-1">Manage your clinic's receptionists</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Receptionist Management</h1>
+          <p className="text-slate-500 mt-1 text-sm">Manage your clinic's receptionists</p>
         </div>
         <button
           onClick={openAddModal}
@@ -292,12 +292,12 @@ const ReceptionistManagement = () => {
 
       {/* Search and Filter Bar */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        <div className="relative flex-1 max-w-2xl">
+          <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
           <input
             type="text"
             placeholder="Search by name or email..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
