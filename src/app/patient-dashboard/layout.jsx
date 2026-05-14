@@ -402,10 +402,10 @@ export default function DashboardLayout({ children }) {
                   <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white"></div>
                 </div>
                 <div>
-                  <h1 className="font-bold text-xl bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                    Patient Portal
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent">
+                    HealthByte
                   </h1>
-                  <p className="text-xs text-gray-500 mt-0.5">Healthcare Dashboard</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Patient Portal</p>
                 </div>
               </div>
               <button 
@@ -501,11 +501,11 @@ export default function DashboardLayout({ children }) {
  
             
             <div className="gap-6">
-            <button className="relative mr-6 p-3 rounded-xl hover:bg-gray-100/50 transition-all duration-200 group">
-                <FiBell className="w-5 h-5 text-gray-600 group-hover:text-gray-800" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500/20 rounded-full animate-ping"></span>
-              </button>
+
+
+
+
+
             {/* Modern Book Appointment button */}
             <Link
               href="/doctors"

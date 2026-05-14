@@ -55,35 +55,44 @@ export default function ClinicLayout({ children }) {
     { icon: Users, label: 'Doctors', href: '/clinic/doctors', id: 'doctors' },
     { icon: UserPlus, label: 'Receptionists', href: '/clinic/receptionists', id: 'receptionists' },
     { icon: User, label: 'Patients', href: '/clinic/patients', id: 'patients' },
-    { icon: ImageIcon, label: 'Manage Images', href: '/clinic/images', id: 'images' },
     { icon: Settings, label: 'Settings', href: '/clinic/settings', id: 'settings' }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30 relative overflow-hidden">
+      {/* Decorative background blobs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/30 rounded-full blur-[120px] -z-10 animate-pulse"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-100/30 rounded-full blur-[120px] -z-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
+
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden transition-all duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Animated Desktop Sidebar */}
       <motion.div
-        initial={{ x: -100 }}
-        animate={{ x: 0 }}
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-        className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64 lg:bg-white lg:shadow-xl lg:block"
+        className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-72 lg:bg-white/80 lg:backdrop-blur-xl lg:border-r lg:border-slate-200/60 lg:shadow-xl lg:shadow-slate-200/20 lg:block"
       >
-        <div className="flex h-16 items-center justify-around px-6 border-b border-gray-200/50">
-          <div className="w-10 h-10 bg-white shadow-xl rounded-lg flex items-center justify-center">
-            <Building2 className="w-5 h-5 text-blue-600" />
+        <div className="flex h-20 items-center px-8 border-b border-slate-200/60">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/20 rounded-xl flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent">
+                HealthByte
+              </h1>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Clinic Admin</p>
+            </div>
           </div>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            HealthByte
-          </h1>
         </div>
+
         <nav className="mt-8 px-4">
           {sidebarItems.map((item) => {
             const Icon = item.icon;
@@ -94,7 +103,7 @@ export default function ClinicLayout({ children }) {
                 href={item.href}
                 className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
                   isActive
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
                     : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
                 }`}
               >
@@ -153,55 +162,49 @@ export default function ClinicLayout({ children }) {
       )}
 
       {/* Main content */}
-      <div className="lg:ml-64">
+      <div className="lg:ml-72 flex-1 flex flex-col min-h-screen">
         {/* Top navbar */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="flex items-center justify-between h-16 px-6">
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
+          <div className="flex items-center justify-between h-20 px-8">
             <div className="flex items-center">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100"
+                className="lg:hidden p-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors mr-4"
               >
                 <Menu className="w-5 h-5" />
               </button>
               
-              <div className="hidden md:flex items-center ml-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <div className="hidden md:flex items-center">
+                <div className="relative group">
+                  <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4 group-focus-within:text-blue-500 transition-colors" />
                   <input
                     type="text"
-                    placeholder="Search doctors, receptionists..."
-                    className="pl-10 pr-4 py-2 w-80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Search doctors, patients..."
+                    className="pl-11 pr-4 py-2.5 w-80 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all outline-none"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-              {/* Notifications */}
-              <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-
+            <div className="flex items-center space-x-6">
               {/* Profile dropdown */}
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100"
+                  className="flex items-center space-x-3 p-1.5 pl-3 rounded-xl hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                  <div className="hidden md:block text-right">
+                    <p className="text-sm font-bold text-slate-900">{clinicData?.name || 'Clinic Name'}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Clinic Admin</p>
+                  </div>
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20 p-0.5 border-2 border-white">
                     {clinicData?.profileImage ? (
-                      <img src={clinicData.profileImage} alt="Clinic" className="rounded-full w-full h-full object-cover" />
+                      <img src={clinicData.profileImage} alt="Clinic" className="rounded-lg w-full h-full object-cover" />
                     ) : (
-                      <Building2 className="w-4 h-4 text-white" />
+                      <Building2 className="w-5 h-5 text-white" />
                     )}
                   </div>
-                  <div className="hidden md:block text-left">
-                    <p className="text-sm font-medium text-gray-900">{clinicData?.name || 'Clinic Name'}</p>
-                    <p className="text-xs text-gray-500">Clinic Admin</p>
-                  </div>
-                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {profileDropdownOpen && (

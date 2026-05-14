@@ -67,28 +67,31 @@ export default function Sidebar({ isOpen, onClose }) {
       
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-50 w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 shadow-xl shadow-slate-200/20 transform transition-transform duration-300 ease-in-out
         lg:translate-x-0 lg:static lg:inset-0
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+        <div className="flex items-center px-8 h-20 border-b border-slate-200/60">
           <Link href="/receptionist-dashboard" className="flex items-center hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
               <Users className="w-5 h-5 text-white" />
             </div>
-            <span className="ml-3 text-base font-bold text-gray-800 truncate max-w-[180px]">
-              {userName}
-            </span>
+            <div className="ml-3 min-w-0">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent truncate max-w-[150px]">
+                HealthByte
+              </h1>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Front Office</p>
+            </div>
           </Link>
           <button
             onClick={onClose}
-            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+            className="lg:hidden ml-auto p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <nav className="mt-6 px-3">
+        <nav className="mt-8 px-4">
           <div className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -110,8 +113,6 @@ export default function Sidebar({ isOpen, onClose }) {
             })}
           </div>
         </nav>
-
-
       </div>
     </>
   );

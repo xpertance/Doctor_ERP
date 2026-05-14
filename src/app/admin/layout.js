@@ -56,52 +56,45 @@ export default function DashboardLayout({ children }) {
   }, [router])
 
   return (
-    <div className="min-h-screen bg-gray-50 relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-white to-indigo-50/30"></div>
-      <div 
-        className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233B82F6' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }}
-      ></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30 relative overflow-hidden">
+      {/* Decorative background blobs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/20 rounded-full blur-[120px] -z-10 animate-pulse"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-100/20 rounded-full blur-[120px] -z-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
 
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden transition-all duration-300"
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm lg:hidden transition-all duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl border-r border-blue-100
-        transform transition-all duration-300 ease-out lg:translate-x-0 shadow-xl
+        fixed inset-y-0 left-0 z-50 w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200/60
+        transform transition-all duration-300 ease-out lg:translate-x-0 shadow-xl shadow-slate-200/20
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex h-full flex-col">
-          <div className="flex h-20 items-center justify-between px-6 border-b border-blue-50">
+          <div className="flex h-20 items-center px-8 border-b border-slate-200/60">
             <div className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Sparkles className="h-6 w-6 text-white" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-500 rounded-2xl blur-md opacity-30"></div>
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/20 rounded-xl flex items-center justify-center">
+                <Sparkles className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent">
                   HealthByte
                 </h1>
-                <p className="text-xs text-blue-500 font-medium">Admin Portal</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">SuperAdmin Portal</p>
               </div>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-2 rounded-xl hover:bg-blue-50 transition-all duration-200 group"
+              className="lg:hidden p-2 rounded-xl hover:bg-slate-100 transition-all duration-200 group"
             >
-              <X className="h-5 w-5 text-blue-600 group-hover:text-blue-700" />
+              <X className="h-5 w-5 text-slate-600 group-hover:text-blue-700" />
             </button>
           </div>
 
-          <nav className="flex-1 px-4 py-8 space-y-3">
+          <nav className="flex-1 px-4 py-8 space-y-2">
             {navigation.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href || 
@@ -110,45 +103,32 @@ export default function DashboardLayout({ children }) {
                 <a
                   key={item.name}
                   href={item.href}
-                  className={`group relative flex items-center px-4 py-4 text-sm font-semibold rounded-2xl
-                           transition-all duration-200 ease-out hover:scale-[1.02] transform
+                  className={`group flex items-center px-4 py-3 mb-2 text-sm font-semibold rounded-xl
+                           transition-all duration-200
                            ${isActive 
-                             ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25' 
+                             ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' 
                              : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                            }`}
                 >
-                  <div className={`p-2.5 rounded-xl mr-4 transition-all duration-200 ${
-                    isActive 
-                      ? 'bg-white/20 shadow-sm' 
-                      : 'bg-blue-100 group-hover:bg-blue-200'
-                  }`}>
-                    <Icon className={`h-5 w-5 ${
-                      isActive ? 'text-white' : 'text-blue-600'
-                    }`} />
-                  </div>
+                  <Icon className="h-5 w-5 mr-3 flex-shrink-0" />
                   <span className="flex-1">{item.name}</span>
-                  <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${
-                    isActive 
-                      ? 'rotate-90 text-white' 
-                      : 'text-gray-400 group-hover:translate-x-1 group-hover:text-blue-500'
-                  }`} />
                 </a>
               )
             })}
           </nav>
 
-          <div className="p-4 border-t border-blue-50">
+          <div className="p-4 border-t border-slate-200/60">
             <button 
               onClick={() => {
                 localStorage.removeItem('token'); 
                 localStorage.removeItem('user');
                 router.push('/login');
               }}
-              className="flex w-full items-center px-4 py-4 text-sm font-semibold text-red-600 rounded-2xl
+              className="flex w-full items-center px-4 py-3.5 text-sm font-bold text-red-600 rounded-xl
                          transition-all duration-200 ease-out hover:bg-red-50 hover:scale-[1.02] transform"
             >
-              <div className="p-2.5 rounded-xl mr-4 bg-red-100 group-hover:bg-red-200">
-                <LogOut className="h-5 w-5 text-red-600" />
+              <div className="p-2 rounded-lg mr-3 bg-red-100 group-hover:bg-red-200 transition-colors">
+                <LogOut className="h-4 w-4 text-red-600" />
               </div>
               <span className="flex-1">Logout</span>
             </button>
@@ -156,62 +136,62 @@ export default function DashboardLayout({ children }) {
         </div>
       </div>
 
-      <div className="lg:pl-72">
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-blue-100 shadow-sm">
-          <div className="flex h-20 items-center justify-between px-6">
+      <div className="lg:pl-72 flex-1 flex flex-col min-h-screen">
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
+          <div className="flex h-20 items-center justify-between px-8">
             <div className="flex items-center flex-1">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-3 rounded-2xl hover:bg-blue-50 transition-all duration-200 group mr-4"
+                className="lg:hidden p-3 rounded-2xl hover:bg-slate-100 transition-all duration-200 group mr-4"
               >
-                <Menu className="h-6 w-6 text-blue-600 group-hover:text-blue-700" />
+                <Menu className="h-6 w-6 text-slate-600 group-hover:text-blue-700" />
               </button>
               
-              <div className="relative flex-1 max-w-2xl">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-400" />
+              <div className="relative flex-1 max-w-2xl group">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                 <input
                   type="text"
-                  placeholder="Search..."
-                  className="w-full pl-12 pr-6 py-4 bg-white border-2 border-blue-100 rounded-2xl text-gray-900 placeholder-blue-400
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                           transition-all duration-300 shadow-sm hover:shadow-md focus:shadow-lg"
+                  placeholder="Global Search..."
+                  className="w-full pl-12 pr-6 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white
+                           transition-all duration-300 shadow-sm"
                 />
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-              <button className="relative p-3 rounded-2xl hover:bg-blue-50 transition-all duration-200 group">
-                <Bell className="h-6 w-6 text-blue-600 group-hover:text-blue-700" />
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center text-xs text-white font-bold shadow-md">
-                  3
-                </span>
-              </button>
-              
+            <div className="flex items-center space-x-6">
               <div className="relative group cursor-pointer">
-                <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105">
-                  <span className="text-white font-bold text-sm">
-                    {userdata?.name?.charAt(0) || 'A'}
-                  </span>
+                <div className="flex items-center space-x-3 p-1.5 pl-3 rounded-xl hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200">
+                  <div className="text-right hidden md:block">
+                    <p className="text-sm font-bold text-slate-900 truncate">{userdata?.name}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">SuperAdmin</p>
+                  </div>
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 p-0.5 border-2 border-white">
+                    <span className="text-white font-bold text-sm">
+                      {userdata?.name?.charAt(0) || 'A'}
+                    </span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-slate-400 rotate-90 group-hover:translate-y-0.5 transition-transform" />
                 </div>
                 
                 {/* Profile Dropdown */}
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-100 z-50 transform origin-top-right group-hover:translate-y-0 translate-y-2">
-                  <div className="px-4 py-3 border-b border-gray-50 mb-1">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{userdata?.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{userdata?.email}</p>
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-200/60 z-50 transform origin-top-right group-hover:translate-y-0 translate-y-2 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-slate-100 mb-1">
+                    <p className="text-sm font-bold text-slate-900 truncate">{userdata?.name}</p>
+                    <p className="text-[10px] text-slate-500 font-medium truncate">{userdata?.email}</p>
                   </div>
-                  <a href="/admin/settings" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                    <SettingsIcon className="h-4 w-4 mr-3 text-gray-400 group-hover:text-blue-500" />
+                  <a href="/admin/settings" className="flex items-center px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors">
+                    <SettingsIcon className="h-4 w-4 mr-3 text-slate-400" />
                     Settings
                   </a>
-                  <div className="border-t border-gray-50 my-1"></div>
+                  <div className="border-t border-slate-100 my-1"></div>
                   <button 
                     onClick={() => {
                       localStorage.removeItem('token'); 
                       localStorage.removeItem('user');
                       router.push('/login');
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center group/logout"
+                    className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center group/logout"
                   >
                     <LogOut className="h-4 w-4 mr-3 group-hover/logout:scale-110 transition-transform" />
                     Sign out
@@ -222,11 +202,8 @@ export default function DashboardLayout({ children }) {
           </div>
         </header>
 
-        <main className="p-6 relative">
-          <div className="bg-white rounded-3xl border border-blue-100 shadow-xl min-h-[calc(100vh-8rem)] p-8 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-50 to-transparent rounded-full -translate-y-48 translate-x-48 opacity-50"></div>
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-indigo-50 to-transparent rounded-full translate-y-48 -translate-x-48 opacity-50"></div>
-            
+        <main className="p-8 flex-1">
+          <div className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-slate-200/60 shadow-xl shadow-slate-200/10 min-h-[calc(100vh-10rem)] p-8 relative overflow-hidden">
             <div className="relative z-10">
               {children}
             </div>
