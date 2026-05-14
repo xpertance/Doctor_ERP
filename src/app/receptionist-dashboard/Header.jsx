@@ -1,13 +1,11 @@
 'use client';
 // app/components/Layout/Header.jsx
 import { useState } from 'react'
-import { BellIcon, Bars3Icon, MagnifyingGlassIcon, ArrowRightOnRectangleIcon, UserIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, MagnifyingGlassIcon, ArrowRightOnRectangleIcon, UserIcon } from '@heroicons/react/24/outline'
 import { useRouter, usePathname } from 'next/navigation'
 
 export default function Header({ onMenuClick }) {
   const router = useRouter()
-  const [notifications] = useState(3)
-  const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const pathname = usePathname()
 
@@ -33,21 +31,21 @@ export default function Header({ onMenuClick }) {
   }
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
-      <div className="flex items-center justify-between px-6 py-4">
+    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
+      <div className="flex items-center justify-between h-20 px-8">
         <div className="flex items-center">
           {/* Mobile menu button */}
           <button
             onClick={onMenuClick}
-            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+            className="lg:hidden p-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors mr-4"
           >
             <Bars3Icon className="h-6 w-6" />
           </button>
 
           {/* Dashboard Title & Date (Desktop) */}
-          <div className="hidden lg:flex flex-col ml-4 min-w-[200px]">
-            <h2 className="text-xl font-bold text-gray-800 leading-tight">{getPageTitle(pathname)}</h2>
-            <p className="text-xs text-gray-500 font-medium">
+          <div className="hidden lg:flex flex-col min-w-[200px]">
+            <h2 className="text-xl font-bold text-slate-800 leading-tight">{getPageTitle(pathname)}</h2>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
             </p>
           </div>
@@ -63,16 +61,16 @@ export default function Header({ onMenuClick }) {
                 router.push(`/receptionist-dashboard/patients?search=${encodeURIComponent(term)}`);
               }
             }}
-            className="flex-1 max-w-lg mx-4"
+            className="flex-1 max-w-lg mx-8 group"
           >
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <MagnifyingGlassIcon className="h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
               </div>
               <input
                 name="search"
                 type="text"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full pl-12 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all shadow-sm"
                 placeholder="Search patients, appointments..."
               />
             </div>
@@ -82,36 +80,40 @@ export default function Header({ onMenuClick }) {
         )}
 
         {/* Right side */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-6">
 
           {/* User menu */}
-          <div className="relative">
+          <div className="relative group">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center space-x-2 focus:outline-none"
+              className="flex items-center space-x-3 p-1.5 pl-3 rounded-xl hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200"
             >
-              <span className="text-sm text-gray-700">Good morning</span>
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">R</span>
+              <div className="hidden md:block text-right">
+                <p className="text-sm font-bold text-slate-900">Reception Desk</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Front Office</p>
+              </div>
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20 p-0.5 border-2 border-white">
+                <span className="text-white text-sm font-bold">R</span>
               </div>
             </button>
 
             {/* User dropdown menu */}
             {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+              <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-slate-200/60 z-50 overflow-hidden py-2 transform origin-top-right transition-all">
                 <div className="py-1">
                   <button
                     onClick={() => { setShowUserMenu(false); router.push('/receptionist-dashboard/profile'); }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center border-b border-gray-100"
+                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center"
                   >
-                    <UserIcon className="h-4 w-4 mr-2" />
+                    <UserIcon className="h-4 w-4 mr-3 text-slate-400" />
                     My Profile
                   </button>
+                  <div className="border-t border-slate-100 my-2"></div>
                   <button
                     onClick={handleLogout}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                    className="w-full px-4 py-2.5 text-left text-sm font-bold text-red-600 hover:bg-red-50 flex items-center"
                   >
-                    <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
+                    <ArrowRightOnRectangleIcon className="h-4 w-4 mr-3" />
                     Logout
                   </button>
                 </div>
@@ -121,5 +123,5 @@ export default function Header({ onMenuClick }) {
         </div>
       </div>
     </header>
-  )
+  );
 }

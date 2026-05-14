@@ -16,6 +16,8 @@ const ReceptionistManagement = () => {
   const [error, setError] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [receptionistToDelete, setReceptionistToDelete] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [Id, setId] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -101,10 +103,14 @@ const ReceptionistManagement = () => {
     setSuccessMessage('');
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this receptionist?')) {
-      return;
-    }
+  const handleDeleteClick = (id) => {
+    setReceptionistToDelete(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!receptionistToDelete) return;
+    const id = receptionistToDelete;
 
     setDeleteLoading(true);
     try {
@@ -126,6 +132,8 @@ const ReceptionistManagement = () => {
       setError(err.message || 'Failed to delete receptionist');
     } finally {
       setDeleteLoading(false);
+      setShowDeleteConfirm(false);
+      setReceptionistToDelete(null);
     }
   };
 
@@ -403,7 +411,7 @@ const ReceptionistManagement = () => {
                         <FiEdit2 size={18} />
                       </button>
                       <button
-                        onClick={() => handleDelete(receptionist._id)}
+                        onClick={() => handleDeleteClick(receptionist._id)}
                         className="text-red-600 hover:text-red-900"
                         disabled={deleteLoading}
                       >
@@ -463,8 +471,8 @@ const ReceptionistManagement = () => {
 
       {/* Add/Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-center p-6 border-b">
               <h3 className="text-xl font-semibold text-gray-800">
                 {currentReceptionist ? 'Edit Receptionist' : 'Add New Receptionist'}
@@ -666,6 +674,41 @@ const ReceptionistManagement = () => {
                   </div>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setShowDeleteConfirm(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-colors z-10"
+            >
+              <FiX className="h-5 w-5" />
+            </button>
+            <div className="p-6 text-center">
+              <FiTrash2 className="mx-auto h-12 w-12 text-red-500 mb-4" />
+              <h3 className="text-xl font-bold text-gray-900">Delete Receptionist?</h3>
+              <p className="text-gray-500 my-2">This action is permanent and cannot be undone.</p>
+              <div className="flex justify-center gap-3 mt-6">
+                <button 
+                  onClick={() => setShowDeleteConfirm(false)} 
+                  className="px-4 py-2 border rounded-lg hover:bg-gray-50 font-medium text-gray-700"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmDelete} 
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium flex items-center gap-2"
+                  disabled={deleteLoading}
+                >
+                  {deleteLoading && <FiRefreshCw className="animate-spin h-4 w-4" />}
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>

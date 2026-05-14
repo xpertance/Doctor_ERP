@@ -45,7 +45,7 @@ const TimelineItem = ({ date, title, description, active = false }) => (
   </div>
 );
 
-const MedicationCard = ({ name, dosage, frequency, remaining, lastTaken }) => (
+const MedicationCard = ({ name, dosage, frequency, lastTaken }) => (
   <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs hover:shadow-sm transition-shadow">
     <div className="flex justify-between items-start mb-3">
       <h5 className="font-bold text-gray-800">{name}</h5>
@@ -57,21 +57,9 @@ const MedicationCard = ({ name, dosage, frequency, remaining, lastTaken }) => (
         {frequency}
       </p>
       <p className="text-gray-600 flex items-center gap-2">
-        <Pill className="w-3.5 h-3.5 text-gray-400" />
-        {remaining} remaining
-      </p>
-      <p className="text-gray-600 flex items-center gap-2">
         <CheckCircle className="w-3.5 h-3.5 text-gray-400" />
-        Last taken: {lastTaken}
+        Prescribed on: {lastTaken}
       </p>
-    </div>
-    <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
-      <button className="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full hover:bg-blue-100 transition">
-        Log Dose
-      </button>
-      <button className="text-xs text-gray-500 hover:text-gray-700 transition">
-        <MoreHorizontal className="w-4 h-4" />
-      </button>
     </div>
   </div>
 );
@@ -122,6 +110,8 @@ export default function PatientsPage() {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [modalSection, setModalSection] = useState("Personal Info");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [patientVisits, setPatientVisits] = useState([]);
+  const [visitsLoading, setVisitsLoading] = useState(false);
   const searchRef = useRef();
 
   useEffect(() => {
@@ -174,6 +164,31 @@ export default function PatientsPage() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    const fetchVisits = async () => {
+      if (!selectedPatient) return;
+      setVisitsLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_BASE_URL}/api/v1/visit/patient/${selectedPatient._id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        const responseData = await res.json();
+        if (responseData.success) {
+          setPatientVisits(responseData.data.visits || []);
+        } else {
+          setPatientVisits([]);
+        }
+      } catch (err) {
+        console.error('Error fetching patient visits:', err);
+        setPatientVisits([]);
+      } finally {
+        setVisitsLoading(false);
+      }
+    };
+    fetchVisits();
+  }, [selectedPatient]);
 
   const sections = ["Personal Info", "Treatment", "Prescription", "Tablets List"];
 
@@ -353,20 +368,118 @@ export default function PatientsPage() {
                         <Stethoscope className="w-5 h-5 text-blue-600" />
                         Treatment & History
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <InfoCard icon={<AlertCircle className="w-4 h-4" />} title="Medical History" value={selectedPatient.medicalHistory || 'None reported'} className="md:col-span-2" />
                         <InfoCard icon={<Activity className="w-4 h-4" />} title="Allergies" value={selectedPatient.allergies || 'None reported'} className="md:col-span-2" />
-                        <InfoCard icon={<Pill className="w-4 h-4" />} title="Current Medications" value={selectedPatient.currentMedications || 'None'} className="md:col-span-2" />
                       </div>
+                      
+                      <h5 className="text-lg font-bold text-gray-800 mb-4">Past Visits</h5>
+                      {visitsLoading ? (
+                        <div className="text-center py-8 text-gray-500">Loading visit history...</div>
+                      ) : patientVisits.length > 0 ? (
+                        <div className="space-y-4">
+                          {patientVisits.map((visit, i) => (
+                            <div key={i} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                              <div className="flex justify-between items-start mb-2">
+                                <span className="font-semibold text-gray-800">{formatDate(visit.createdAt)}</span>
+                                <StatusBadge status={visit.status === 'completed' ? 'Completed' : 'In Progress'} />
+                              </div>
+                              <p className="text-sm text-gray-600 mb-2"><strong>Diagnosis:</strong> {visit.diagnosis || 'No diagnosis recorded'}</p>
+                              <p className="text-sm text-gray-600"><strong>Notes:</strong> {visit.notes || visit.followUpNotes || 'No additional notes'}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 text-center py-4">No past visits recorded.</p>
+                      )}
                     </section>
                   )}
                   
-                  {(modalSection === "Prescription" || modalSection === "Tablets List") && (
-                    <div className="flex flex-col items-center justify-center py-20 text-center text-gray-500">
-                       <FileText className="w-12 h-12 text-gray-200 mb-4" />
-                       <p className="font-medium">No prescription data available</p>
-                       <p className="text-sm">Visit history records are required to generate prescriptions.</p>
-                    </div>
+                  {modalSection === "Tablets List" && (
+                    <section className="space-y-6">
+                      <h4 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
+                        <Pill className="w-5 h-5 text-blue-600" />
+                        Medication Tracker
+                      </h4>
+                      {visitsLoading ? (
+                        <div className="text-center py-8 text-gray-500">Loading medications...</div>
+                      ) : patientVisits.some(v => v.medicines && v.medicines.length > 0) ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {patientVisits.map(visit => 
+                            visit.medicines?.map((med, idx) => (
+                              <MedicationCard 
+                                key={`${visit._id}-${idx}`}
+                                name={med.name}
+                                dosage={med.dosage}
+                                frequency={med.instructions || med.duration || 'As prescribed'}
+                                remaining="N/A"
+                                lastTaken={formatDate(visit.createdAt)}
+                              />
+                            ))
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-10 text-center text-gray-500">
+                           <List className="w-12 h-12 text-gray-200 mb-4" />
+                           <p className="font-medium">No medications found</p>
+                           <p className="text-sm">No medicines have been prescribed in previous visits.</p>
+                        </div>
+                      )}
+                    </section>
+                  )}
+
+                  {modalSection === "Prescription" && (
+                    <section className="space-y-6">
+                      <h4 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
+                        <FileText className="w-5 h-5 text-blue-600" />
+                        Official Prescriptions
+                      </h4>
+                      {visitsLoading ? (
+                        <div className="text-center py-8 text-gray-500">Loading prescription documents...</div>
+                      ) : patientVisits.filter(v => (v.medicines && v.medicines.length > 0) || v.prescriptionUrl).length > 0 ? (
+                        <div className="space-y-4">
+                          {patientVisits
+                            .filter(v => (v.medicines && v.medicines.length > 0) || v.prescriptionUrl)
+                            .map((visit) => (
+                            <div 
+                              key={visit._id} 
+                              onClick={() => window.open(visit.prescriptionUrl || `/prescription/pdf?id=${visit.appointmentId?._id || visit.appointmentId}`, '_blank')}
+                              className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer group"
+                            >
+                               <div className="flex items-start gap-4">
+                                  <div className="p-3 bg-blue-50 text-blue-600 rounded-lg shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                     <FileText className="w-6 h-6" />
+                                  </div>
+                                  <div>
+                                     <p className="font-bold text-gray-800 group-hover:text-blue-700 transition-colors">Prescription Record</p>
+                                     <p className="text-sm text-gray-500 mt-0.5">
+                                        <Calendar className="inline-block w-3.5 h-3.5 mr-1 mb-0.5" />
+                                        {formatDate(visit.createdAt)}
+                                        {visit.doctorId && (
+                                           <span className="ml-3 border-l pl-3 border-gray-300">
+                                              Dr. {visit.doctorId.firstName} {visit.doctorId.lastName}
+                                           </span>
+                                        )}
+                                     </p>
+                                     <p className="text-xs text-gray-400 mt-1">{visit.medicines?.length || 0} medications prescribed</p>
+                                  </div>
+                               </div>
+                               <div className="flex gap-2 sm:ml-auto">
+                                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg group-hover:bg-blue-50 group-hover:text-blue-600 transition border border-gray-200 text-sm font-medium">
+                                     <Printer className="w-4 h-4" /> Print / View
+                                  </button>
+                               </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-12 text-center text-gray-500 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                           <FileText className="w-12 h-12 text-gray-300 mb-4" />
+                           <p className="font-medium text-gray-700">No prescription documents</p>
+                           <p className="text-sm mt-1">There are no official prescriptions linked to this patient yet.</p>
+                        </div>
+                      )}
+                    </section>
                   )}
                 </div>
               </main>

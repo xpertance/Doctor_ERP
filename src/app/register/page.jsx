@@ -236,25 +236,11 @@ export default function RegistrationPortal() {
   };
   const roles = [
     {
-      id: 'patient-registration',
-      title: 'Patient',
-      description: 'Register to book appointments and manage your health records',
-      icon: '👨‍⚕️',
-      color: 'from-blue-500 to-blue-600'
-    },
-    {
-      id: 'doctor-registration',
-      title: 'Doctor',
-      description: 'Join our network of healthcare professionals',
-      icon: '🩺',
-      color: 'from-purple-500 to-purple-600'
-    },
-    {
       id: 'clinic-registration',
       title: 'Clinic',
       description: 'Register your healthcare facility with our platform',
       icon: '🏥',
-      color: 'from-emerald-500 to-emerald-600'
+      color: 'from-blue-600 to-indigo-600'
     }
   ];
   const steps = [
@@ -2123,20 +2109,27 @@ const handleDoctorInputChange = (field, value) => {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-slate-900 dark:to-blue-900/20 p-4 sm:p-8 relative overflow-hidden">
+      
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-[100px]"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-[100px]"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto relative z-10 w-full">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Join Our Healthcare Network</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Select your role to begin your registration journey
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">Register Your Clinic</h1>
+          <p className="text-xl text-gray-500/90 dark:text-gray-400 max-w-2xl mx-auto">
+            Register Your Clinic to Start Using DOC ERP
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 max-w-md mx-auto gap-8">
           {roles.map((role) => (
             <motion.div
               key={role.id}
-              className={`relative bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300 ${hoveredCard === role.id ? 'scale-105' : 'scale-100'}`}
+              className={`relative bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-white/80 dark:border-slate-700/80 rounded-[2rem] shadow-xl overflow-hidden transition-all duration-300 ${hoveredCard === role.id ? 'scale-105' : 'scale-100'}`}
               onMouseEnter={() => setHoveredCard(role.id)}
               onMouseLeave={() => setHoveredCard(null)}
               onClick={() => handleCardClick(role.id)}
@@ -2145,13 +2138,13 @@ const handleDoctorInputChange = (field, value) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${role.color} opacity-10`}></div>
-              <div className="relative p-8 h-full flex flex-col">
-                <div className="text-5xl mb-6">{role.icon}</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">{role.title}</h3>
-                <p className="text-gray-600 mb-6 flex-grow">{role.description}</p>
-                <div className="mt-auto">
-                  <button className={`w-full py-3 px-6 rounded-lg font-medium bg-gradient-to-br ${role.color} text-white shadow-md hover:shadow-lg transition-all`}>
+              <div className={`absolute inset-0 bg-gradient-to-br ${role.color} opacity-5`}></div>
+              <div className="relative p-10 h-full flex flex-col items-center text-center">
+                <div className="text-6xl mb-6">{role.icon}</div>
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-3">{role.title}</h3>
+                <p className="text-gray-500/90 dark:text-gray-400 mb-8 flex-grow">{role.description}</p>
+                <div className="mt-auto w-full">
+                  <button className={`w-full py-3 px-6 rounded-xl font-medium bg-gradient-to-r ${role.color} text-white shadow-md hover:shadow-lg transition-all`}>
                     Register as {role.title}
                   </button>
                 </div>
@@ -2168,23 +2161,23 @@ const handleDoctorInputChange = (field, value) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50"
             onClick={() => !isPatientLoading && setShowPatientModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto"
+              className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-2xl border border-white/80 dark:border-slate-700/80 rounded-[2rem] shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 w-full">
                 {/* Left Side - Illustration */}
                 <motion.div
                   initial={{ opacity: 0, x: -50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8 }}
-                  className="hidden lg:flex flex-col justify-center items-center bg-gradient-to-br from-blue-50 to-cyan-50 p-8"
+                  className="hidden lg:flex flex-col justify-center items-center bg-cyan-50/30 dark:bg-slate-900/40 p-8 sticky top-0 h-[90vh] flex-shrink-0 border-r border-white/50 dark:border-slate-700/50"
                 >
                   <div className="relative w-full h-96">
                     <img src="/pateint-login.png" alt="Patient" className="w-full h-full object-contain" />
@@ -2228,7 +2221,7 @@ const handleDoctorInputChange = (field, value) => {
                 </motion.div>
 
                 {/* Right Side - Form */}
-                <form onSubmit={handlePatientSubmit} className="p-8">
+                <form onSubmit={handlePatientSubmit} className="p-8 overflow-y-auto flex-grow bg-transparent max-h-[90vh]">
                   <div className="flex justify-between items-center mb-8">
                     <div>
                       <h1 className="text-3xl font-bold text-gray-900">Patient Registration</h1>
@@ -2570,23 +2563,23 @@ const handleDoctorInputChange = (field, value) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50"
             onClick={() => !isDoctorSubmitting && setShowDoctorModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex" // Changed to flex and removed overflow-y-auto
+              className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-2xl border border-white/80 dark:border-slate-700/80 rounded-[2rem] shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex" // Changed to flex and removed overflow-y-auto
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 w-full">
                 {/* Left Side - Illustration */}
                 <motion.div
                   initial={{ opacity: 0, x: -50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8 }}
-                  className="hidden lg:flex flex-col justify-center items-center bg-gradient-to-br from-purple-50 to-indigo-50 p-8 sticky top-0 h-[90vh] flex-shrink-0" // Added sticky, height and flex-shrink
+                  className="hidden lg:flex flex-col justify-center items-center bg-indigo-50/30 dark:bg-slate-900/40 p-8 sticky top-0 h-[90vh] flex-shrink-0 border-r border-white/50 dark:border-slate-700/50" // Added sticky, height and flex-shrink
                 >
                   <div className="relative w-full h-96">
                     <img src="/doctorportalgif4.gif" alt="Doctor" className="w-full h-full object-contain" />
@@ -2600,7 +2593,7 @@ const handleDoctorInputChange = (field, value) => {
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
-                      className="absolute top-10 left-20 bg-white p-3 rounded-full shadow-lg"
+                      className="absolute top-10 left-20 bg-white/90 backdrop-blur-md border border-white/50 p-3 rounded-full shadow-lg"
                     >
                       <FaStethoscope className="text-indigo-400 text-2xl" />
                     </motion.div>
@@ -2615,7 +2608,7 @@ const handleDoctorInputChange = (field, value) => {
                         ease: "easeInOut",
                         delay: 0.5
                       }}
-                      className="absolute bottom-20 right-10 bg-white p-3 rounded-full shadow-lg"
+                      className="absolute bottom-20 right-10 bg-white/90 backdrop-blur-md border border-white/50 p-3 rounded-full shadow-lg"
                     >
                       <FaClinicMedical className="text-purple-400 text-2xl" />
                     </motion.div>
@@ -2630,7 +2623,7 @@ const handleDoctorInputChange = (field, value) => {
                 </motion.div>
 
                 {/* Right Side - Form */}
-                <form onSubmit={handleDoctorSubmit} className="p-8 overflow-y-auto flex-grow">
+                <form onSubmit={handleDoctorSubmit} className="p-8 overflow-y-auto flex-grow bg-transparent max-h-[90vh]">
                   <div className="flex justify-between items-center mb-8">
                     <div>
                       <h1 className="text-3xl font-bold text-gray-900">Doctor Registration</h1>
@@ -3806,26 +3799,26 @@ const handleDoctorInputChange = (field, value) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50"
             onClick={() => !isClinicSubmitting && setShowClinicModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex"
+              className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-2xl border border-white/80 dark:border-slate-700/80 rounded-[2rem] shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 w-full">
                 {/* Left Side - Illustration */}
                 <motion.div
                   initial={{ opacity: 0, x: -50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8 }}
-                  className="hidden lg:flex flex-col justify-center items-center bg-gradient-to-br from-emerald-50 to-teal-50 p-8 sticky top-0 h-[90vh] flex-shrink-0"
+                  className="hidden lg:flex flex-col justify-center items-center bg-blue-50/30 dark:bg-slate-900/40 p-8 sticky top-0 h-[90vh] flex-shrink-0 border-r border-white/50 dark:border-slate-700/50"
                 >
                   <div className="relative w-full h-72 px-16">
-                    <img src="/Copilot_20250629_102248.png" alt="Clinic" className="w-full h-full  rounded-2xl " />
+                    <img src="/Copilot_20250629_102248.png" alt="Clinic" className="w-full h-full object-cover rounded-2xl shadow-lg border border-white/50" />
 
                     <motion.div
                       animate={{ y: [0, -15, 0] }}
@@ -3882,7 +3875,7 @@ const handleDoctorInputChange = (field, value) => {
                     {steps.map((_, index) => (
                       <div
                         key={index}
-                        className={`flex-1 h-2 rounded-full ${currentClinicStep >= index ? 'bg-emerald-600' : 'bg-gray-200'}`}
+                        className={`flex-1 h-2 rounded-full ${currentClinicStep >= index ? 'bg-blue-600' : 'bg-gray-200'}`}
                       />
                     ))}
                   </div>
@@ -3915,7 +3908,7 @@ const handleDoctorInputChange = (field, value) => {
                         type="button"
                         onClick={handleClinicSubmit}
                         disabled={isSubmitting}
-                        className={`px-8 py-3 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 hover:shadow-md ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+                        className={`px-8 py-3 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 hover:shadow-md ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
                           }`}
                       >
                         {isSubmitting ? (
