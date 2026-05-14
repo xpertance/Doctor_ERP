@@ -50,15 +50,17 @@ export default function MedicalRecords() {
   );
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[500px]">
-      <div className="hidden bg-gradient-to-r from-blue-50 to-indigo-100 p-6 border-b border-blue-200 flex justify-between items-center">
-        <div className="flex items-center">
-          <ClipboardList className="text-blue-600 mr-3" size={28} />
-          <h1 className="text-2xl font-bold text-gray-800">Medical Records Dashboard</h1>
+    <div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Medical Records</h1>
+          <p className="text-gray-600 mt-1">View and manage patient clinical histories</p>
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[500px]">
+        <div className="p-6">
         <div className="flex justify-between items-center mb-4">
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
@@ -139,6 +141,7 @@ export default function MedicalRecords() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

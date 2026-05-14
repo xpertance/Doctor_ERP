@@ -126,7 +126,7 @@ export default function AnalyticsPage() {
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="px-3 py-2 bg-white/60 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            className="px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
           >
             <option value="7d">Last 7 days</option>
             <option value="30d">Last 30 days</option>
@@ -136,7 +136,7 @@ export default function AnalyticsPage() {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="p-2 bg-white/60 backdrop-blur-sm border border-white/20 rounded-xl hover:bg-white/80 transition-colors disabled:opacity-50"
+            className="p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
@@ -150,7 +150,7 @@ export default function AnalyticsPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsCards.map((stat, index) => (
-          <div key={index} className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-sm card-hover">
+          <div key={index} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm card-hover">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">{stat.title}</p>
@@ -167,7 +167,7 @@ export default function AnalyticsPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Patient Flow Chart */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-sm">
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Patient Flow</h3>
             <BarChart3 className="h-5 w-5 text-gray-400" />
@@ -191,7 +191,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Department Distribution */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-sm">
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Department Distribution</h3>
             <PieChart className="h-5 w-5 text-gray-400" />
@@ -216,7 +216,7 @@ export default function AnalyticsPage() {
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activities */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-sm">
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Recent Activities</h3>
             <Activity className="h-5 w-5 text-gray-400" />
@@ -237,7 +237,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Top Performing Doctors */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-sm">
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Top Performing Doctors</h3>
             <Users className="h-5 w-5 text-gray-400" />

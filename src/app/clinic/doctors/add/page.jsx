@@ -438,8 +438,8 @@ const nextStep = async (e) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mb-4">
@@ -470,7 +470,7 @@ const nextStep = async (e) => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 backdrop-blur-sm border border-white/20">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 border border-slate-200">
           <div className="space-y-6">
             
             {/* Step 1: Personal Information */}

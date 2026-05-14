@@ -31,9 +31,9 @@ export default function Header({ onMenuClick }) {
   }
 
   return (
-    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
-      <div className="flex items-center justify-between h-20 px-8">
-        <div className="flex items-center">
+    <header className="sticky top-0 z-30 bg-white border-b border-slate-200/60">
+      <div className="flex items-center justify-between h-16 px-8">
+        <div className="flex items-center flex-1">
           {/* Mobile menu button */}
           <button
             onClick={onMenuClick}
@@ -42,58 +42,49 @@ export default function Header({ onMenuClick }) {
             <Bars3Icon className="h-6 w-6" />
           </button>
 
-          {/* Dashboard Title & Date (Desktop) */}
-          <div className="hidden lg:flex flex-col min-w-[200px]">
-            <h2 className="text-xl font-bold text-slate-800 leading-tight">{getPageTitle(pathname)}</h2>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-            </p>
-          </div>
-        </div>
-
-        {/* Search bar - Only show on Dashboard */}
-        {(pathname === '/receptionist-dashboard') ? (
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              const term = e.target.search.value;
-              if (term.trim()) {
-                router.push(`/receptionist-dashboard/patients?search=${encodeURIComponent(term)}`);
-              }
-            }}
-            className="flex-1 max-w-lg mx-8 group"
-          >
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-              </div>
-              <input
-                name="search"
-                type="text"
-                className="block w-full pl-12 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all shadow-sm"
-                placeholder="Search patients, appointments..."
-              />
+          {pathname === '/receptionist-dashboard' && (
+            <div className="hidden lg:flex flex-1 max-w-2xl ml-4 group">
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const term = e.target.search.value;
+                  if (term.trim()) {
+                    router.push(`/receptionist-dashboard/patients?search=${encodeURIComponent(term)}`);
+                  }
+                }}
+                className="w-full relative"
+              >
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <MagnifyingGlassIcon className="h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                </div>
+                <input
+                  name="search"
+                  type="text"
+                  className="block w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+                  placeholder="Search patients, appointments, or invoices..."
+                />
+              </form>
             </div>
-          </form>
-        ) : (
-          <div className="flex-1"></div>
-        )}
+          )}
+        </div>
 
         {/* Right side */}
         <div className="flex items-center space-x-6">
+          
+
 
           {/* User menu */}
           <div className="relative group">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center space-x-3 p-1.5 pl-3 rounded-xl hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200"
+              className="flex items-center space-x-3 hover:bg-slate-50 transition-all rounded-lg p-1"
             >
-              <div className="hidden md:block text-right">
-                <p className="text-sm font-bold text-slate-900">Reception Desk</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Front Office</p>
+              <div className="hidden md:flex flex-col items-end">
+                <p className="text-sm font-semibold text-slate-800">Welcome, Receptionist</p>
+                <p className="text-xs text-slate-500">Front Office</p>
               </div>
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20 p-0.5 border-2 border-white">
-                <span className="text-white text-sm font-bold">R</span>
+              <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                R
               </div>
             </button>
 

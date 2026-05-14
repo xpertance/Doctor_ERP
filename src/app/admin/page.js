@@ -61,16 +61,19 @@ export default function Dashboard() {
   ]
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your clinics today.</p>
-        </div>
-        <div className="flex items-center space-x-2 text-sm text-gray-500 bg-white/50 px-4 py-2 rounded-lg">
-          <Calendar className="h-4 w-4" />
-          <span>Last updated: {new Date().toLocaleDateString()}</span>
+    <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="flex flex-col gap-2 mb-2">
+
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
+            <p className="text-slate-500 mt-1 text-sm">Welcome back! Here's what's happening today.</p>
+          </div>
+          <div className="flex items-center space-x-2 text-sm text-slate-500 bg-white border border-slate-200 shadow-sm px-4 py-2 rounded-xl">
+            <Calendar className="h-4 w-4 text-blue-500" />
+            <span className="font-medium">Last updated: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          </div>
         </div>
       </div>
 

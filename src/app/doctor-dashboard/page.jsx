@@ -85,8 +85,22 @@ const DoctorMainDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="space-y-8 max-w-7xl mx-auto">
+        {/* Page Header */}
+        {/* Breadcrumbs */}
+
+
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Doctor Dashboard</h1>
+            <p className="text-slate-500 mt-1 text-sm">Welcome back! Here's what's happening today.</p>
+          </div>
+          <div className="flex items-center space-x-2 text-sm text-slate-500 bg-white border border-slate-200 shadow-sm px-4 py-2 rounded-xl">
+            <Calendar className="h-4 w-4 text-blue-500" />
+            <span className="font-medium">Last updated: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          </div>
+        </div>
         
         {/* Top Operational Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -215,7 +229,6 @@ const DoctorMainDashboard = () => {
 
         </div>
       </div>
-    </div>
   );
 };
 

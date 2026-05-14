@@ -297,18 +297,18 @@ export default function ClinicsManage() {
       {/* Filters and Search */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
+          <div className="relative flex-1 max-w-2xl">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-slate-400" />
             </div>
             <input
               type="text"
               placeholder="Search clinics..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg bg-gray-50
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                       transition-all duration-200"
+              className="block w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm"
+
+
             />
           </div>
 

@@ -142,19 +142,28 @@ export default function DoctorBilling() {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      {/* Header with Medical Stats */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-100 p-6 border-b border-blue-200">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center">
-            <Stethoscope className="text-blue-600 mr-3" size={28} />
-            <h1 className="text-2xl font-bold text-gray-800">Medical Billing Dashboard</h1>
-          </div>
-          <div className="flex space-x-2">
-            <button 
-              onClick={handlePrint}
-              className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 shadow-sm"
-            >
+    <div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Medical Billing</h1>
+          <p className="text-gray-600 mt-1">Manage patient invoices and revenue</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Header with Medical Stats */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-100 p-6 border-b border-blue-200">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center">
+              <Stethoscope className="text-blue-600 mr-3" size={28} />
+              <h2 className="text-xl font-bold text-gray-800">Billing Summary</h2>
+            </div>
+            <div className="flex space-x-2">
+              <button 
+                onClick={handlePrint}
+                className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 shadow-sm"
+              >
               <Download className="mr-2" size={16} /> Export
             </button>
             <button 
@@ -569,6 +578,7 @@ export default function DoctorBilling() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

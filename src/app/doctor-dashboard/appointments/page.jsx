@@ -725,34 +725,26 @@ const DoctorAppointmentsDashboard = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="hidden bg-white/70 backdrop-blur-lg rounded-2xl shadow-sm p-6 mb-6 border border-white/80">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-lg">
-                <Stethoscope className="text-white w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800">Doctor's Appointments</h1>
-                <p className="text-sm text-gray-500/90">View today's queue and start consultations</p>
-              </div>
-            </div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Doctor's Appointments</h1>
+            <p className="text-gray-600 mt-1">View today's queue and start consultations</p>
           </div>
         </div>
 
         {/* Search and Filters */}
         <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-sm p-5 mb-6 border border-white/80">
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-grow">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="text-blue-500/80 w-5 h-5" />
+            <div className="relative flex-grow max-w-2xl">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-slate-400" />
               </div>
               <input
                 type="text"
                 placeholder="Search patients..."
-                className="w-full pl-11 pr-4 py-3 text-sm border border-gray-200/70 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/30 transition-all bg-white/50"
+                className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -875,7 +867,6 @@ const DoctorAppointmentsDashboard = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

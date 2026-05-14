@@ -67,20 +67,19 @@ export default function Sidebar({ isOpen, onClose }) {
       
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 shadow-xl shadow-slate-200/20 transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-50 w-80 bg-white border-r border-indigo-100 shadow-sm shadow-indigo-100/50 transform transition-transform duration-300 ease-in-out
         lg:translate-x-0 lg:static lg:inset-0
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="flex items-center px-8 h-20 border-b border-slate-200/60">
+        <div className="flex items-center px-6 h-16 border-b border-slate-100">
           <Link href="/receptionist-dashboard" className="flex items-center hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <Users className="w-5 h-5 text-white" />
             </div>
             <div className="ml-3 min-w-0">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent truncate max-w-[150px]">
+              <h1 className="text-xl font-bold text-slate-800 truncate">
                 HealthByte
               </h1>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Front Office</p>
             </div>
           </Link>
           <button
@@ -91,7 +90,7 @@ export default function Sidebar({ isOpen, onClose }) {
           </button>
         </div>
 
-        <nav className="mt-8 px-4">
+        <nav className="mt-6 px-3 flex-1 overflow-y-auto">
           <div className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -101,18 +100,20 @@ export default function Sidebar({ isOpen, onClose }) {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
-                    isActive ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                  className={`flex items-center px-3 py-2.5 mb-1 rounded-xl transition-all duration-200 font-medium ${
+                    isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
                   }`}
                   onClick={onClose}
                 >
-                  <Icon className="w-5 h-5 mr-3 flex-shrink-0" />
-                  <span className="font-medium">{item.name}</span>
+                  <Icon className={`w-5 h-5 mr-3 flex-shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <span>{item.name}</span>
                 </Link>
               );
             })}
           </div>
         </nav>
+
+
       </div>
     </>
   );

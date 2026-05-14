@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react'
 import { 
-  ArrowLeft,
   Upload,
   User,
   Mail,
@@ -127,22 +126,17 @@ export default function AddDoctorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-4">
-          <button className="p-2 hover:bg-white/50 rounded-xl transition-colors">
-            <ArrowLeft className="h-5 w-5 text-gray-600" />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Add New Doctor</h1>
-            <p className="text-gray-600 mt-1">Fill in the details to add a new doctor to the system</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Add New Doctor</h1>
+          <p className="text-gray-600 mt-1">Fill in the details to add a new doctor to the system</p>
         </div>
 
         <div className="space-y-8">
           {/* Profile Image Upload */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-sm">
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
               <User className="h-5 w-5 mr-2 text-indigo-600" />
               Profile Photo
@@ -183,7 +177,7 @@ export default function AddDoctorPage() {
           </div>
 
           {/* Personal Information */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-sm">
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
               <User className="h-5 w-5 mr-2 text-indigo-600" />
               Personal Information
@@ -245,7 +239,7 @@ export default function AddDoctorPage() {
           </div>
 
           {/* Contact Information */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-sm">
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
               <Mail className="h-5 w-5 mr-2 text-indigo-600" />
               Contact Information
@@ -316,7 +310,7 @@ export default function AddDoctorPage() {
           </div>
 
           {/* Professional Information */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-sm">
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
               <Stethoscope className="h-5 w-5 mr-2 text-indigo-600" />
               Professional Information
@@ -429,7 +423,7 @@ export default function AddDoctorPage() {
           </div>
 
           {/* Availability */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-sm">
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
               <Calendar className="h-5 w-5 mr-2 text-indigo-600" />
               Availability

@@ -27,19 +27,25 @@ export default function FollowUpMonitor() {
   const fetchFollowUps = async (date = selectedDate) => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) { setLoading(false); return; } // Guard: not logged in
-      const res = await fetch(`${API_BASE_URL}/api/v1/followup/list?date=${date}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      if (!token) { setLoading(false); return; }
 
-      if (!res.ok) {
-        throw new Error(`Server returned ${res.status}`);
-      }
-
-      const response = await res.json();
+      // Use the reliable appointmentService instead of the failing standalone endpoint
+      const response = await appointmentService.getAppointments({ date, limit: 100 }, token);
+      
       if (response.success) {
-        // Flatten or process data if needed, but assuming backend returns array of follow-ups
-        setFollowUps(response.data || []);
+        const allAppts = response.data?.appointments || [];
+        // Filter for follow-up appointments and map to the format the component expects
+        const filteredFollowUps = allAppts
+          .filter(app => app.type === 'follow_up' || app.type === 'Follow-up')
+          .map(app => ({
+            appointment_id: app._id,
+            patient_id: app.patientId?._id || app.patientId?.id,
+            patient_name: `${app.patientId?.firstName || ''} ${app.patientId?.lastName || ''}`.trim(),
+            doctor_name: `${app.doctorId?.firstName || ''} ${app.doctorId?.lastName || ''}`.trim(),
+            status: app.status
+          }));
+        
+        setFollowUps(filteredFollowUps);
       }
     } catch (err) {
       console.error("Follow-up Fetch Error:", err);

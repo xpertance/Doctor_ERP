@@ -574,18 +574,24 @@ const PatientManagementPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto pt-4">
+    <div className="max-w-7xl mx-auto">
 
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Patient Management</h1>
+            <p className="text-gray-600 mt-1">Manage all patient records and history</p>
+          </div>
+        </div>
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <div className="relative flex-1 max-w-2xl">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Search patients..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-80"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -762,7 +768,6 @@ const PatientManagementPage = () => {
           handleSubmit={handleSubmit}
         />
       </div>
-    </div>
   );
 };
 

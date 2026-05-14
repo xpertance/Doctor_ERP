@@ -223,16 +223,23 @@ function PatientsPageContent() {
 
   return (
     <div className="space-y-6 relative font-sans">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Patient Management</h1>
+          <p className="text-gray-600 mt-1">Manage all patient records and history</p>
+        </div>
+      </div>
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4">
         {/* Search Input */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className="relative flex-1 max-w-2xl">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
           <input
             type="text"
             placeholder="Search patients..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm"
           />
         </div>
 

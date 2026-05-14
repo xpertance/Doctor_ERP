@@ -16,10 +16,19 @@ import { useRouter } from 'next/navigation';
 export default function RestructuredDashboard() {
   const router = useRouter();
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 lg:p-8 space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 max-w-7xl mx-auto animate-in fade-in duration-500">
 
 
-      {/* 1. Key Stats & Primary Action */}
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Receptionist Dashboard</h1>
+          <p className="text-gray-600 mt-1">Manage patients, doctors, and daily appointments.</p>
+        </div>
+        <div className="flex items-center space-x-2 text-sm text-slate-500 bg-white border border-slate-200 shadow-sm px-4 py-2 rounded-xl">
+          <span className="font-medium">Today: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+        </div>
+      </div>      {/* 1. Key Stats & Primary Action */}
       <section className="space-y-4">
         <h2 className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Performance Metrics</h2>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

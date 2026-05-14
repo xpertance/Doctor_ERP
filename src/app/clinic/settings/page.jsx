@@ -280,7 +280,7 @@ useEffect(()=>{
                   </div>
                 </div>
                 <label className="cursor-pointer group">
-                  <div className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center space-x-2">
+                  <div className="px-6 py-3 bg-blue-600 text-white rounded-xl shadow-md hover:bg-blue-700 transition-all duration-300 flex items-center space-x-2">
                     <span>📷</span>
                     <span className="font-medium">Change Logo</span>
                   </div>
@@ -596,20 +596,20 @@ useEffect(()=>{
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8 px-4 sm:px-6 lg:px-8">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-      </div>
+    <div className="min-h-screen bg-slate-50">
 
-      <div className="max-w-6xl mx-auto relative z-10">
+
+
+
+
+
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-8 animate-fadeInUp">
-          <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
             Clinic Settings
           </h1>
-          <p className="mt-3 text-xl text-gray-600">
+          <p className="text-slate-500 mt-1 text-sm">
             Manage your clinic's profile and preferences
           </p>
         </div>
@@ -657,7 +657,7 @@ useEffect(()=>{
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`px-8 py-3 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 hover:shadow-md ${
+                className={`px-8 py-3 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 hover:shadow-md ${
                   isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
                 }`}
               >
