@@ -40,7 +40,12 @@ export default function DynamicDashboard() {
     if (!userId) return;
     
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/patient/fetch-by-id/${userId}`);
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/api/v1/patient/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       
       if (data.patient) {
@@ -55,7 +60,12 @@ export default function DynamicDashboard() {
     if (!userId) return;
     
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/appointment/patient/${userId}`);
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/api/v1/appointment/patient/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       
       if (data.success) {
