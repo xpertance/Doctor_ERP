@@ -834,16 +834,20 @@ const DoctorAppointmentsDashboard = () => {
 
                     {/* Actions Column */}
                     <div className="col-span-12 md:col-span-3 flex justify-end">
-                      {(appointment.status === 'checkedIn' || appointment.status === 'checked_in') ? (
+                      {(appointment.status === 'checkedIn' || appointment.status === 'checked_in' || appointment.status === 'in_progress') ? (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push(`/doctor-dashboard/consultation/${appointment.appointment_id}`);
                           }}
-                          className="w-full md:w-auto px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                          className={`w-full md:w-auto px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg transition-all flex items-center justify-center gap-2 ${
+                            appointment.status === 'in_progress' 
+                              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 shadow-emerald-500/30 hover:shadow-emerald-500/40' 
+                              : 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-500/30 hover:shadow-blue-500/40'
+                          } hover:scale-[1.02]`}
                         >
                           <Stethoscope size={16} />
-                          Start Consult
+                          {appointment.status === 'in_progress' ? 'Resume Consult' : 'Start Consult'}
                         </button>
                       ) : appointment.status === 'completed' ? (
                         <div className="px-4 py-2 bg-gray-50 border border-gray-200 text-gray-500 rounded-xl text-xs font-bold flex items-center gap-2">

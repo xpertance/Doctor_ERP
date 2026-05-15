@@ -36,7 +36,7 @@ const ReceptionistLogin = () => {
       
       if (responseData.success && responseData.data) {
         console.log('Login successful:', responseData);
-        login(responseData.data.token, responseData.data.staff);
+        login(responseData.data.token, responseData.data.user);
         router.push("/receptionist-dashboard");
       } else {
         throw new Error(responseData.message || 'Invalid credentials');

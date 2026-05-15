@@ -519,27 +519,7 @@ const AppointmentsDashboardContent = () => {
                         </button>
                       )}
 
-                      {appointment.status === 'checked_in' && (
-                        <button
-                          onClick={() => handleStatusUpdate(appointment._id, 'in_progress')}
-                          disabled={isUpdatingStatus}
-                          className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-600 hover:text-white transition-all flex items-center gap-1"
-                        >
-                          <ArrowRight size={14} />
-                          Start
-                        </button>
-                      )}
-
-                      {appointment.status === 'in_progress' && (
-                        <button
-                          onClick={() => handleStatusUpdate(appointment._id, 'completed')}
-                          disabled={isUpdatingStatus}
-                          className="px-3 py-1.5 bg-purple-50 text-purple-600 border border-purple-200 rounded-xl text-xs font-bold hover:bg-purple-600 hover:text-white transition-all flex items-center gap-1"
-                        >
-                          <ThumbsUp size={14} />
-                          Complete
-                        </button>
-                      )}
+                      {/* Removed Start and Complete buttons as these are clinical actions handled by doctors */}
 
                       {/* Cancel Button for all non-final statuses */}
                       {!['completed', 'cancelled'].includes(appointment.status) && (

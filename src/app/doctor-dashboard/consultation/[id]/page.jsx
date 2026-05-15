@@ -288,7 +288,8 @@ const ConsultationDesk = () => {
         body: JSON.stringify({
           appointment_id: id,
           doctor_id: userData.id,
-          patient_id: data.patient._id
+          patient_id: data.patient._id,
+          clinicId: userData.clinicId
         })
       });
 
